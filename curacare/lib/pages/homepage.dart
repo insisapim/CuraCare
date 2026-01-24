@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  var kPrimaryGreen = Color(0xFF2ECC71);
+  var kSoftGreen = Color(0xFFE9FBF3);
+  var textGreen = Color.fromARGB(255, 0, 153, 5);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6FFFB),
-      body: Container(
+      backgroundColor: Color(0xFFF6FFFB),
+      body: SingleChildScrollView(
         padding: EdgeInsets.all(22),
         child: Column(
           children: [
@@ -23,11 +27,11 @@ class _HomePageState extends State<HomePage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Hello"),
+                    Text("สวัสดีตอนบ่าย", style: TextStyle(fontSize: 20)),
                     Text(
-                      "Sarah",
+                      "คุณสมศรี 👋",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -36,12 +40,12 @@ class _HomePageState extends State<HomePage> {
                 Stack(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2ECC71),
+                        color: kPrimaryGreen,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.favorite,
                         color: Colors.white,
                         size: 22,
@@ -53,7 +57,7 @@ class _HomePageState extends State<HomePage> {
                       child: Container(
                         width: 10,
                         height: 10,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           color: Colors.orange,
                           shape: BoxShape.circle,
                         ),
@@ -64,6 +68,7 @@ class _HomePageState extends State<HomePage> {
               ],
             ),
             Card(
+              color: Colors.white,
               margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
               child: Column(
                 children: [
@@ -75,61 +80,410 @@ class _HomePageState extends State<HomePage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Icon(Icons.heart_broken_rounded),
+                              Stack(
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: kSoftGreen,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Icon(
+                                      Icons.favorite_border_outlined,
+                                      color: Colors.green,
+                                      size: 40,
+                                    ),
+                                  ),
+                                ],
+                              ),
                               SizedBox(width: 16),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text("Today's Status"),
-                                  Text("Looking Good!"),
+                                  Text(
+                                    "สถานะวันนี้",
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                  Text(
+                                    "สุขภาพดี!",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 24,
+                                    ),
+                                  ),
                                 ],
                               ),
                               Spacer(),
-                              Text("View"),
+                              GestureDetector(
+                                onTap: () {},
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      "ดูรายละเอียด",
+                                      style: TextStyle(
+                                        color: textGreen,
+                                        fontSize: 18,
+                                      ),
+                                    ),
+                                    Icon(Icons.chevron_right, color: textGreen),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       ],
                     ),
                   ),
+                  Divider(color: Colors.grey.shade300, height: 32),
                   Padding(
                     padding: EdgeInsets.all(16),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(children: [Text("5"), Text("กิจวัตรวันนี้")]),
-                        Column(children: [Text("2"), Text("นัดหมาย")]),
-                        Column(children: [Text("80%"), Text("ทำสำเร็จ")]),
+                        Column(
+                          children: [
+                            Text(
+                              "5",
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              "กิจวัตรวันนี้",
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              "2",
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text("นัดหมาย", style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              "80%",
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: textGreen,
+                              ),
+                            ),
+                            Text("ทำสำเร็จ", style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-            Card(
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Expanded(
+            // ส่วนของ กิจวัตรถัดไป, นัดหมายที่ใกล้จะถึง
+
+            //กิจวัตร
+            Container(
+              margin: EdgeInsets.fromLTRB(0, 24, 0, 24),
+              child: Column(
+                children: [
+                  Card(
+                    color: const Color.fromARGB(255, 255, 242, 225),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () {},
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.orange,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(
+                                Icons.notifications_on_outlined,
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                                size: 28,
+                              ),
+                            ),
+                            SizedBox(width: 20),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "กิจวัตรประจำวัน",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  "แผนดูแลสุขภาพตามโรค",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color:  Color.fromARGB(255, 92, 92, 92),
+                                  ),
+                                ),
+                                
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            //นัดหมายที่จะถึง
+            Container(
+              margin: EdgeInsets.fromLTRB(0, 0, 0, 24),
+              child: Column(
+                children: [
+                  Card(
+                    color: const Color.fromARGB(255, 218, 255, 219),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () {},
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: kPrimaryGreen,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(
+                                Icons.calendar_today_outlined,
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                                size: 28,
+                              ),
+                            ),
+                            SizedBox(width: 20),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "กิจวัตรประจำวัน",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  "แผนดูแลสุขภาพตามโรค",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Color.fromARGB(255, 92, 92, 92),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              children: [
+                Text(
+                  "เมนูหลัก",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                ),
+              ],
+            ),
+            Column(
+              children: [
+                Card(
+                  color: Colors.white,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {},
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
                       child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(Icons.heart_broken_rounded),
-                          const SizedBox(width: 16), // เว้นระยะ icon กับ text
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text("Today's Status"),
-                              Text("Looking Good!"),
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFE9FBF3),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Icon(
+                                  Icons.assignment_outlined,
+                                  color: Color(0xFF2ECC71),
+                                  size: 28,
+                                ),
+                              ),
+                              Text(
+                                "กิจวัตรประจำวัน",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "แผนดูแลสุขภาพตามโรค",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
                             ],
                           ),
                         ],
                       ),
                     ),
-                    const Text("View", style: TextStyle(color: Colors.green)),
-                  ],
+                  ),
                 ),
-              ),
+              ],
+            ),
+            Column(
+              children: [
+                Card(
+                  color: Colors.white,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {},
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(255, 213, 236, 255),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Icon(
+                                  Icons.calendar_today_outlined,
+                                  color: Colors.blue,
+                                  size: 28,
+                                ),
+                              ),
+                              Text(
+                                "ปฏิทินนัดหมาย",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "จัดการการนัดพบแพทย์",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            //คู่มือปฐมพยาบาล
+            Column(
+              children: [
+                Card(
+                  color: Colors.white,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {},
+                    child: Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: const Color.fromARGB(255, 255, 218, 219),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Icon(
+                                  Icons.warning_amber_outlined,
+                                  color: Colors.red,
+                                  size: 28,
+                                ),
+                              ),
+                              Text(
+                                "คู่มือปฐมพยาบาล",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "วิธีช่วยเหลือเบื้องต้น",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
