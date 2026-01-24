@@ -1,3 +1,4 @@
+import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -236,10 +237,9 @@ class _HomePageState extends State<HomePage> {
                                   "แผนดูแลสุขภาพตามโรค",
                                   style: TextStyle(
                                     fontSize: 18,
-                                    color:  Color.fromARGB(255, 92, 92, 92),
+                                    color: Color.fromARGB(255, 92, 92, 92),
                                   ),
                                 ),
-                                
                               ],
                             ),
                           ],
@@ -395,7 +395,12 @@ class _HomePageState extends State<HomePage> {
                               Container(
                                 padding: EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 213, 236, 255),
+                                  color: const Color.fromARGB(
+                                    255,
+                                    213,
+                                    236,
+                                    255,
+                                  ),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: Icon(
@@ -452,7 +457,12 @@ class _HomePageState extends State<HomePage> {
                               Container(
                                 padding: EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 255, 218, 219),
+                                  color: const Color.fromARGB(
+                                    255,
+                                    255,
+                                    218,
+                                    219,
+                                  ),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: Icon(
@@ -488,19 +498,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "หน้าหลัก"),
-          BottomNavigationBarItem(icon: Icon(Icons.task), label: "กิจวัตร"),
-          BottomNavigationBarItem(icon: Icon(Icons.schedule), label: "นัดหมาย"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dangerous),
-            label: "ปฐมพยาบาล",
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "โปรไฟล์"),
-        ],
-      ),
+      bottomNavigationBar: CustomBottomNavigationBar(currentIndex: 0),
     );
   }
 }
