@@ -1,5 +1,8 @@
+import 'package:curacare/pages/appointment_page.dart';
+import 'package:curacare/pages/firstaid_page.dart';
 import 'package:curacare/pages/homepage.dart';
 import 'package:curacare/pages/search_page.dart';
+import 'package:curacare/pages/setting_page.dart';
 import 'package:flutter/material.dart';
 
 class CustomBottomNavigationBar extends StatefulWidget {
@@ -13,7 +16,7 @@ class CustomBottomNavigationBar extends StatefulWidget {
 }
 
 class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
-  final List<StatefulWidget> pages = [HomePage(), SearchPage()];
+  final List<StatefulWidget> pages = [HomePage(), SearchPage(), AppointmentPage(), FirstaidPage() ,SettingPage()];
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
@@ -35,7 +38,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
         }
         Navigator.of(
           context,
-        ).push(MaterialPageRoute<void>(builder: (context) => pages[value]));
+        ).pushReplacement(MaterialPageRoute<void>(builder: (context) => pages[value]));
       },
     );
   }
