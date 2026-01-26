@@ -18,16 +18,21 @@ class _SearchResultState extends State<SearchResult> {
       itemCount: widget.conditionList.length,
       itemBuilder: (context, index) {
         final condition = widget.conditionList[index];
+        String description = "";
+        if (condition.description != null) {
+          description = condition.description!;
+        }
         return ListTile(
           title: Text(
             condition.name,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           ),
-          subtitle: Text(condition.description),
+          subtitle: Text(description),
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (context) => ConditionDetailPage(condition: condition),
+                builder: (context) =>
+                    ConditionDetailPage(conditionId: condition.id),
               ),
             );
           },

@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:curacare/models/condition.dart';
+import 'package:curacare/services/condition.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:curacare/widgets/search_result.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -15,26 +19,36 @@ class _SearchPageState extends State<SearchPage> {
   final kSoftGreen = Color(0xFFE9FBF3);
   final textGreen = Color.fromARGB(255, 0, 153, 5);
 
-  final List<Condition> testConditions = [
-    Condition(
-      id: '1',
-      name: 'decease',
-      description: "test",
-      detail: "This will be long text",
-    ),
-    Condition(
-      id: '2',
-      name: 'Normal',
-      description: "test",
-      detail: "This will be long text",
-    ),
-    Condition(
-      id: '2',
-      name: 'Insi kaka',
-      description: "test",
-      detail: "This will be long text",
-    ),
-  ];
+  final ScrollController _scrollController = ScrollController();
+
+  final List<Condition> _conditions = [];
+  bool _isLoading = false;
+  int _page = 0;
+
+  Future<void> fetchConditions() async {
+    if (_isLoading) return;
+    _isLoading = true;
+    final conditions = await getConditions(_page);
+
+    setState(() {
+      _conditions.addAll(conditions);
+      _page++;
+      _isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchConditions();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        fetchConditions();
+      }
+    });
+  }
 
   final PreferredSizeWidget _buildAppBar = AppBar(
     title: Text(
@@ -55,7 +69,7 @@ class _SearchPageState extends State<SearchPage> {
         spacing: 20,
         children: [
           _buildSearchBar,
-          Expanded(child: SearchResult(conditionList: testConditions)),
+          Expanded(child: SearchResult(conditionList: _conditions)),
         ],
       ),
       bottomNavigationBar: CustomBottomNavigationBar(currentIndex: 1),
