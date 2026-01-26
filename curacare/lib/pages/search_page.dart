@@ -21,31 +21,28 @@ class _SearchPageState extends State<SearchPage> {
 
   final ScrollController _scrollController = ScrollController();
 
+  final SearchController _searchController = SearchController();
+
   final List<Condition> _conditions = [];
   bool _isLoading = false;
   int _page = 0;
 
-  Future<void> fetchConditions() async {
-    if (_isLoading) return;
-    _isLoading = true;
-    final conditions = await getConditions(_page);
-
-    setState(() {
-      _conditions.addAll(conditions);
-      _page++;
-      _isLoading = false;
-    });
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    fetchConditions();
+    fetchConditions(_searchController.value.text);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
-        fetchConditions();
+        fetchConditions(_searchController.value.text);
       }
     });
   }
@@ -58,7 +55,28 @@ class _SearchPageState extends State<SearchPage> {
     automaticallyImplyLeading: false,
   );
 
-  final Widget _buildSearchBar = SearchBar(hintText: "ค้นหาอาการ");
+  Future<void> fetchConditions(String query) async {
+    if (_isLoading) return;
+    _isLoading = true;
+    final conditions = await getConditions(_page, query);
+
+    setState(() {
+      _conditions.addAll(conditions);
+      _page++;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> searchConditions(String query) async {
+    final conditions = await getConditions(_page, query);
+
+    setState(() {
+      _conditions.clear();
+      _conditions.addAll(conditions);
+      _page = 1;
+      _isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +86,11 @@ class _SearchPageState extends State<SearchPage> {
       body: Column(
         spacing: 20,
         children: [
-          _buildSearchBar,
+          SearchBar(
+            controller: _searchController,
+            hintText: "ค้นหาอาการ",
+            onSubmitted: (value) => searchConditions(value),
+          ),
           Expanded(child: SearchResult(conditionList: _conditions)),
         ],
       ),

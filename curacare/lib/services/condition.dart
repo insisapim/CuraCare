@@ -5,10 +5,13 @@ import 'dart:io';
 import 'package:curacare/models/condition.dart';
 import 'package:http/http.dart' as http;
 
-Future<List<Condition>> getConditions(int page) async {
-  final res = await http.get(
-    Uri.http('10.0.2.2:4000', "/conditions", {"page": "$page", "limit": "20"}),
-  );
+Future<List<Condition>> getConditions(int page, String query) async {
+  Map<String, String> params = {"page": "0", "limit": "20"};
+  if (query != "") {
+    params.addAll({"query": query});
+  }
+
+  final res = await http.get(Uri.http('10.0.2.2:4000', "/conditions", params));
 
   if (res.statusCode != 200) return [];
 
