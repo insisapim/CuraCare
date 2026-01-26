@@ -66,7 +66,10 @@ class _SettingPageState extends State<SettingPage> {
                 card_sup_title: "sarah.johnson@email.com",
                 icon: Icons.person_outlined,
               ),
-              Text("ข้อมูลการรักษา"),
+              Container(
+                margin: EdgeInsets.fromLTRB(0, 20, 0, 5),
+                child: Text("ข้อมูลการรักษา" ,style: TextStyle(fontSize: 20)),
+              ),
               FormatCard(
                 card_title: "บันทึกโรค",
                 card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกโรค",
@@ -76,12 +79,17 @@ class _SettingPageState extends State<SettingPage> {
                 card_title: "บันทึกยา",
                 card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกยา",
                 icon: Icons.article_outlined,
+                color: Colors.blue,
               ),
-              FormatCard(
+              Container(
+                margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
+                child: FormatCard(
                 card_title: "Sign Out",
                 card_sup_title: "",
                 icon: Icons.logout,
+                color: Colors.red,
               ),
+              )
             ],
           ),
       
