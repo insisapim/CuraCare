@@ -1,11 +1,8 @@
-import 'dart:convert';
-
 import 'package:curacare/models/condition.dart';
 import 'package:curacare/services/condition.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:curacare/widgets/search_result.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});

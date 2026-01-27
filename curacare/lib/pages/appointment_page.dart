@@ -15,14 +15,16 @@ class _AppointmentPageState extends State<AppointmentPage> {
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [Text("ปฏิทินนัดหมาย", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),), Text("จัดการการนัดพบแพทย์", style: TextStyle(fontSize: 18))],
+          children: [
+            Text(
+              "ปฏิทินนัดหมาย",
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+            Text("จัดการการนัดพบแพทย์", style: TextStyle(fontSize: 18)),
+          ],
         ),
       ),
-      body: Column(
-        children: [
-          Text("this is body")
-          ]
-        ),
+      body: Column(children: [Text("this is body")]),
       bottomNavigationBar: CustomBottomNavigationBar(currentIndex: 2),
     );
   }
