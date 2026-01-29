@@ -65,7 +65,7 @@ class _FirstaidPageState extends State<FirstaidPage> {
               FormatCard(
                 card_title: "เลือดออกรุนแรง",
                 card_sup_title: "การควบคุมการเสียเลือดมาก",
-                icon: Icons.water_drop, 
+                icon: Icons.water_drop,
                 color: Colors.red,
               ),
               FormatCard(
@@ -89,4 +89,3 @@ class _FirstaidPageState extends State<FirstaidPage> {
     );
   }
 }
-

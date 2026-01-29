@@ -57,42 +57,40 @@ class _SettingPageState extends State<SettingPage> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
-        child:
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              FormatCard(
-                card_title: "Sarah Johnson",
-                card_sup_title: "sarah.johnson@email.com",
-                icon: Icons.person_outlined,
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(0, 20, 0, 5),
-                child: Text("ข้อมูลการรักษา" ,style: TextStyle(fontSize: 20)),
-              ),
-              FormatCard(
-                card_title: "บันทึกโรค",
-                card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกโรค",
-                icon: Icons.favorite_border_outlined,
-              ),
-              FormatCard(
-                card_title: "บันทึกยา",
-                card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกยา",
-                icon: Icons.article_outlined,
-                color: Colors.blue,
-              ),
-              Container(
-                margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
-                child: FormatCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            FormatCard(
+              card_title: "Sarah Johnson",
+              card_sup_title: "sarah.johnson@email.com",
+              icon: Icons.person_outlined,
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(0, 20, 0, 5),
+              child: Text("ข้อมูลการรักษา", style: TextStyle(fontSize: 20)),
+            ),
+            FormatCard(
+              card_title: "บันทึกโรค",
+              card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกโรค",
+              icon: Icons.favorite_border_outlined,
+            ),
+            FormatCard(
+              card_title: "บันทึกยา",
+              card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกยา",
+              icon: Icons.article_outlined,
+              color: Colors.blue,
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
+              child: FormatCard(
                 card_title: "Sign Out",
                 card_sup_title: "",
                 icon: Icons.logout,
                 color: Colors.red,
               ),
-              )
-            ],
-          ),
-      
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: CustomBottomNavigationBar(currentIndex: 4),
     );
