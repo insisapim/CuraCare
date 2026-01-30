@@ -5,7 +5,9 @@ import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key});
+  const SearchPage({super.key, this.searchText});
+
+  final String? searchText;
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -26,16 +28,23 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    fetchConditions(_searchController.value.text);
+
+    // Set initial search text from navigation parameter
+    if (widget.searchText != null && widget.searchText!.isNotEmpty) {
+      _searchController.text = widget.searchText!;
+    }
+
+    searchConditions(_searchController.value.text);
+
+    // Listen for scroll to load more
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
           _scrollController.position.maxScrollExtent - 200) {
@@ -76,13 +85,16 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildListTileCard(ListTile listTile) {
-    return Card(child: listTile);
+    return Card(color: Colors.white, child: listTile);
   }
 
   Widget _buildResult(List<Condition> conditionList) {
+    if (_conditions.isEmpty) {
+      return Center(child: Text("ขออภัย ไม่พบโรคหรืออาการที่คุณต้องการ"));
+    }
     return ListView.builder(
+      controller: _scrollController,
       itemCount: conditionList.length,
-
       itemBuilder: (context, index) {
         final condition = conditionList[index];
         String description = "";
@@ -119,8 +131,9 @@ class _SearchPageState extends State<SearchPage> {
         children: [
           SearchBar(
             controller: _searchController,
-            hintText: "ค้นหาอาการ",
-            onSubmitted: (value) => searchConditions(value),
+            hintText: "ค้นหาโรค อาการ...",
+            onChanged: (value) => searchConditions(value),
+            backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
           ),
           Expanded(child: _buildResult(_conditions)),
         ],

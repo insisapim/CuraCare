@@ -1,3 +1,6 @@
+import 'package:curacare/models/condition.dart';
+import 'package:curacare/pages/search_page.dart';
+import 'package:curacare/services/condition.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -12,183 +15,214 @@ class _HomePageState extends State<HomePage> {
   var kPrimaryGreen = Color(0xFF2ECC71);
   var kSoftGreen = Color(0xFFE9FBF3);
   var textGreen = Color.fromARGB(255, 0, 153, 5);
+  int _page = 0;
+
+  final SearchController _searchController = SearchController();
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(22),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("สวัสดีตอนบ่าย", style: TextStyle(fontSize: 20)),
-                    Text(
-                      "คุณสมศรี 👋",
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+  void dispose() {
+    // TODO: implement dispose
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  void searchConditions(String query) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => SearchPage(searchText: query)),
+    );
+  }
+
+  final PreferredSizeWidget _buildAppBar = AppBar(
+    titleSpacing: 20,
+    actionsPadding: EdgeInsets.all(10),
+    automaticallyImplyLeading: false,
+
+    title: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("สวัสดีตอนบ่าย", style: TextStyle(fontSize: 20)),
+        Text(
+          "คุณสมศรี 👋",
+          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+        ),
+      ],
+    ),
+    toolbarHeight: 100,
+    actions: [
+      Stack(
+        children: [
+          Stack(
+            children: [
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Color(0xFF2ECC71),
+                  shape: BoxShape.circle,
                 ),
-                Stack(
+                child: Icon(Icons.favorite, color: Colors.white, size: 22),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+  );
+
+  final Widget _buildTodayStatus = Card(
+    color: Colors.white,
+    child: Container(
+      margin: EdgeInsets.only(top: 24, bottom: 24),
+      child: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: kPrimaryGreen,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.favorite,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: Colors.orange,
-                          shape: BoxShape.circle,
+                    Stack(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFE9FBF3),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Icon(
+                            Icons.favorite_border_outlined,
+                            color: Colors.green,
+                            size: 40,
+                          ),
                         ),
+                      ],
+                    ),
+                    SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("สถานะวันนี้", style: TextStyle(fontSize: 18)),
+                        Text(
+                          "สุขภาพดี!",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 24,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Spacer(),
+                    GestureDetector(
+                      onTap: () {},
+                      child: Row(
+                        children: [
+                          Text(
+                            "ดูรายละเอียด",
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 0, 153, 5),
+                              fontSize: 18,
+                            ),
+                          ),
+                          Icon(
+                            Icons.chevron_right,
+                            color: Color.fromARGB(255, 0, 153, 5),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            Card(
-              color: Colors.white,
-              margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        Container(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Stack(
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: kSoftGreen,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Icon(
-                                      Icons.favorite_border_outlined,
-                                      color: Colors.green,
-                                      size: 40,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(width: 16),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "สถานะวันนี้",
-                                    style: TextStyle(fontSize: 18),
-                                  ),
-                                  Text(
-                                    "สุขภาพดี!",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 24,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Spacer(),
-                              GestureDetector(
-                                onTap: () {},
-                                child: Row(
-                                  children: [
-                                    Text(
-                                      "ดูรายละเอียด",
-                                      style: TextStyle(
-                                        color: textGreen,
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                    Icon(Icons.chevron_right, color: textGreen),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+          ),
+          Divider(color: Colors.grey.shade300, height: 32),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      "5",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Divider(color: Colors.grey.shade300, height: 32),
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              "5",
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              "กิจวัตรวันนี้",
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              "2",
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text("นัดหมาย", style: TextStyle(fontSize: 16)),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              "80%",
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                                color: textGreen,
-                              ),
-                            ),
-                            Text("ทำสำเร็จ", style: TextStyle(fontSize: 16)),
-                          ],
-                        ),
-                      ],
+                    Text("กิจวัตรวันนี้", style: TextStyle(fontSize: 16)),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text(
+                      "2",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                    Text("นัดหมาย", style: TextStyle(fontSize: 16)),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Text(
+                      "80%",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 0, 153, 5),
+                      ),
+                    ),
+                    Text("ทำสำเร็จ", style: TextStyle(fontSize: 16)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: _buildAppBar,
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(22),
+        child: Column(
+          children: [
+            Container(
+              margin: EdgeInsets.only(bottom: 24),
+              child: SearchBar(
+                backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
+                controller: _searchController,
+                hintText: "ค้นหาโรค อาการ...",
+                onSubmitted: (value) => searchConditions(value),
               ),
             ),
-            // ส่วนของ กิจวัตรถัดไป, นัดหมายที่ใกล้จะถึง
 
+            _buildTodayStatus,
             //กิจวัตร
             Container(
               margin: EdgeInsets.fromLTRB(0, 24, 0, 24),
