@@ -1,3 +1,4 @@
+import 'package:curacare/widgets/appointment_card.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +25,29 @@ class _AppointmentPageState extends State<AppointmentPage> {
           ],
         ),
       ),
-      body: Column(children: [Text("this is body")]),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CalendarDatePicker(
+              initialDate: DateTime.now(),
+              firstDate: DateTime(2020),
+              lastDate: DateTime(2030),
+              onDateChanged: (date) {
+                print(date);
+              },
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(20, 0, 0, 0),
+              child: Text(
+                "นัดหมายที่กำลังจะถึง",
+                style: TextStyle(fontSize: 20),
+              ),
+            ),
+            AppointmentCard(),
+          ],
+        ),
+      ),
       bottomNavigationBar: CustomBottomNavigationBar(currentIndex: 2),
     );
   }
