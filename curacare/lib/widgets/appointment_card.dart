@@ -1,10 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 
 class AppointmentCard extends StatelessWidget {
-  const AppointmentCard({super.key});
+  final String title;
+  final String location;
+  final DateTime dateTime;
+  final IconData icon;
+  final String? requireTask;
+  final Color? color;
+  final Color? backgroundColor;
+  final Color? textcolor;
+  const AppointmentCard({
+    super.key,
+    required this.title,
+    required this.location,
+    required this.dateTime,
+    required this.icon,
+    this.requireTask,
+    this.color,
+    this.backgroundColor,
+    this.textcolor,
+    
+    });
 
   @override
   Widget build(BuildContext context) {
+    var objectColor = color ?? const Color(0xFF2ECC71);
+    var objectBackgroundColor = backgroundColor ?? const Color.fromARGB(255, 255, 255, 255);
+    var objectTextColor = textcolor ?? const Color.fromARGB(255, 0, 0, 0);
+    var task = requireTask ?? "เพิ่มสิ่งที่จำเป็นต้องทำก่อนไปนัดหมาย";
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -13,47 +38,51 @@ class AppointmentCard extends StatelessWidget {
         child: Row(
           children: [
             Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 227, 184),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(Icons.medication_liquid_outlined, color: Colors.orange, size: 28),
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: objectBackgroundColor,
+                borderRadius: BorderRadius.circular(14),
               ),
-              SizedBox(width: 16,),
+              child: Icon(
+                icon,
+                color: objectColor,
+                size: 28,
+              ),
+            ),
+            SizedBox(width: 16),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "เจาะเลือดตรวจ HbA1c",
+                  title,
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 8),
 
                 Row(
-                  children: const [
+                  children: [
                     Icon(
                       Icons.location_on_outlined,
                       size: 18,
                       color: Colors.grey,
                     ),
                     SizedBox(width: 6),
-                    Text("ห้องแล็บ โรงพยาบาลกรุงเทพ"),
+                    Text(location),
                   ],
                 ),
 
                 const SizedBox(height: 6),
 
                 Row(
-                  children: const [
+                  children:[
                     Icon(
                       Icons.calendar_today_outlined,
                       size: 18,
                       color: Colors.grey,
                     ),
                     SizedBox(width: 6),
-                    Text("12 ม.ค. • 07:00 น."),
+                    Text("$dateTime")
                   ],
                 ),
 
@@ -65,12 +94,12 @@ class AppointmentCard extends StatelessWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFF3E5),
+                    color: backgroundColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Text(
-                    "งดอาหาร 8–12 ชม.",
-                    style: TextStyle(color: Colors.orange),
+                  child: Text(
+                    "$task",
+                    style: TextStyle(color: objectColor, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
