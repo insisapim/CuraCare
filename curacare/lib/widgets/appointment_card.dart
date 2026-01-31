@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-
 
 class AppointmentCard extends StatelessWidget {
   final String title;
@@ -21,13 +19,13 @@ class AppointmentCard extends StatelessWidget {
     this.color,
     this.backgroundColor,
     this.textcolor,
-    
-    });
+  });
 
   @override
   Widget build(BuildContext context) {
     var objectColor = color ?? const Color(0xFF2ECC71);
-    var objectBackgroundColor = backgroundColor ?? const Color.fromARGB(255, 255, 255, 255);
+    var objectBackgroundColor =
+        backgroundColor ?? const Color.fromARGB(255, 255, 255, 255);
     var objectTextColor = textcolor ?? const Color.fromARGB(255, 0, 0, 0);
     var task = requireTask ?? "เพิ่มสิ่งที่จำเป็นต้องทำก่อนไปนัดหมาย";
     return Card(
@@ -43,11 +41,7 @@ class AppointmentCard extends StatelessWidget {
                 color: objectBackgroundColor,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(
-                icon,
-                color: objectColor,
-                size: 28,
-              ),
+              child: Icon(icon, color: objectColor, size: 28),
             ),
             SizedBox(width: 16),
             Column(
@@ -75,14 +69,14 @@ class AppointmentCard extends StatelessWidget {
                 const SizedBox(height: 6),
 
                 Row(
-                  children:[
+                  children: [
                     Icon(
                       Icons.calendar_today_outlined,
                       size: 18,
                       color: Colors.grey,
                     ),
                     SizedBox(width: 6),
-                    Text("$dateTime")
+                    Text("$dateTime"),
                   ],
                 ),
 
@@ -99,7 +93,10 @@ class AppointmentCard extends StatelessWidget {
                   ),
                   child: Text(
                     "$task",
-                    style: TextStyle(color: objectColor, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: objectColor,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],

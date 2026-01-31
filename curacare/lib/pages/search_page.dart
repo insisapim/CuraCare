@@ -54,11 +54,21 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   final PreferredSizeWidget _buildAppBar = AppBar(
-    title: Text(
-      "ค้นหา",
-      style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900),
+    title: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "ค้นหาโรค",
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          "ค้นหาโรคจากชื่อหรืออาการที่คุณพบ",
+          style: TextStyle(fontSize: 18),
+        ),
+      ],
     ),
     automaticallyImplyLeading: false,
+    toolbarHeight: 80,
   );
 
   Future<void> fetchConditions(String query) async {
@@ -85,12 +95,25 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildListTileCard(ListTile listTile) {
-    return Card(color: Colors.white, child: listTile);
+    return Card(
+      color: Colors.white,
+      child: listTile,
+      shadowColor: Colors.black,
+    );
   }
 
   Widget _buildResult(List<Condition> conditionList) {
     if (_conditions.isEmpty) {
-      return Center(child: Text("ขออภัย ไม่พบโรคหรืออาการที่คุณต้องการ"));
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.only(left: 8, right: 8),
+          child: Text(
+            "ขออภัย ไม่พบโรคหรืออาการที่คุณต้องการ",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
     }
     return ListView.builder(
       controller: _scrollController,
@@ -104,7 +127,7 @@ class _SearchPageState extends State<SearchPage> {
         ListTile listTile = ListTile(
           title: Text(
             condition.name,
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
           ),
           subtitle: Text(description),
           onTap: () {
@@ -129,12 +152,16 @@ class _SearchPageState extends State<SearchPage> {
       body: Column(
         spacing: 20,
         children: [
-          SearchBar(
-            controller: _searchController,
-            hintText: "ค้นหาโรค อาการ...",
-            onChanged: (value) => searchConditions(value),
-            backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
+          Padding(
+            padding: EdgeInsets.only(left: 4, right: 5),
+            child: SearchBar(
+              controller: _searchController,
+              hintText: "ค้นหาโรค อาการ...",
+              onChanged: (value) => searchConditions(value),
+              backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
+            ),
           ),
+
           Expanded(child: _buildResult(_conditions)),
         ],
       ),

@@ -1,6 +1,4 @@
-import 'package:curacare/models/condition.dart';
 import 'package:curacare/pages/search_page.dart';
-import 'package:curacare/services/condition.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -15,8 +13,6 @@ class _HomePageState extends State<HomePage> {
   var kPrimaryGreen = Color(0xFF2ECC71);
   var kSoftGreen = Color(0xFFE9FBF3);
   var textGreen = Color.fromARGB(255, 0, 153, 5);
-  int _page = 0;
-
   final SearchController _searchController = SearchController();
 
   @override
