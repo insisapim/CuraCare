@@ -5,7 +5,7 @@ import 'package:curacare/models/condition.dart';
 import 'package:http/http.dart' as http;
 
 Future<List<Condition>> getConditions(int page, String query) async {
-  Map<String, String> params = {"page": "0", "limit": "20"};
+  Map<String, String> params = {"page": "$page", "limit": "8"};
   if (query != "") {
     params.addAll({"query": query});
   }

@@ -84,7 +84,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   Future<void> searchConditions(String query) async {
-    final conditions = await getConditions(_page, query);
+    final conditions = await getConditions(0, query);
 
     setState(() {
       _conditions.clear();
