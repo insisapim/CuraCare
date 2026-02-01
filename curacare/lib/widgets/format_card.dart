@@ -7,7 +7,7 @@ class FormatCard extends StatelessWidget {
   final Color? color;
   final Color? backgroundColor;
   final Color? textcolor;
-  
+  final Widget? screen;
   const FormatCard({
     super.key,
     required this.card_title,
@@ -15,14 +15,15 @@ class FormatCard extends StatelessWidget {
     required this.icon,
     this.color,
     this.backgroundColor,
-    this.textcolor
+    this.textcolor,
+    this.screen,
   });
 
-  
   @override
   Widget build(BuildContext context) {
     var objectColor = color ?? const Color(0xFF2ECC71);
-    var objectBackgroundColor = backgroundColor ?? const Color.fromARGB(255, 255, 255, 255);
+    var objectBackgroundColor =
+        backgroundColor ?? const Color.fromARGB(255, 255, 255, 255);
     var objectTextColor = textcolor ?? const Color.fromARGB(255, 0, 0, 0);
     return Card(
       margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -31,7 +32,14 @@ class FormatCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
-        onTap: () {},
+        onTap: () {
+          if (screen != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => screen!),
+            );
+          }
+        },
         child: Padding(
           padding: EdgeInsets.all(20),
           child: Row(
@@ -45,13 +53,17 @@ class FormatCard extends StatelessWidget {
                 ),
                 child: Icon(icon, color: objectColor, size: 28),
               ),
-              SizedBox(width: 16,),
+              SizedBox(width: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     card_title,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: objectTextColor),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: objectTextColor,
+                    ),
                   ),
                   SizedBox(height: 6),
                   Text(

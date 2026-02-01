@@ -1,3 +1,5 @@
+import 'package:curacare/pages/chronicdisease_page.dart';
+import 'package:curacare/pages/regularmedicine_page.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:curacare/widgets/format_card.dart';
 import 'package:flutter/material.dart';
@@ -73,12 +75,14 @@ class _SettingPageState extends State<SettingPage> {
               card_title: "บันทึกโรค",
               card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกโรค",
               icon: Icons.favorite_border_outlined,
+              screen: ChronicdiseasePage(),
             ),
             FormatCard(
               card_title: "บันทึกยา",
               card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกยา",
               icon: Icons.article_outlined,
               color: Colors.blue,
+              screen: RegularmedicinePage(),
             ),
             Container(
               margin: EdgeInsets.fromLTRB(0, 30, 0, 0),

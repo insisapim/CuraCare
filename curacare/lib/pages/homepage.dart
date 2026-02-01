@@ -1,3 +1,5 @@
+import 'package:curacare/pages/appointment_page.dart';
+import 'package:curacare/pages/firstaid_page.dart';
 import 'package:curacare/pages/search_page.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
@@ -412,7 +414,14 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(20),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AppointmentPage(),
+                        ),
+                      );
+                    },
                     child: Padding(
                       padding: EdgeInsets.all(20),
                       child: Row(
@@ -474,7 +483,14 @@ class _HomePageState extends State<HomePage> {
                   ),
                   child: InkWell(
                     borderRadius: BorderRadius.circular(20),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FirstaidPage(),
+                        ),
+                      );
+                    },
                     child: Padding(
                       padding: EdgeInsets.all(20),
                       child: Row(
