@@ -3,6 +3,7 @@ import 'package:curacare/pages/regularmedicine_page.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:curacare/widgets/format_card.dart';
 import 'package:flutter/material.dart';
+import 'package:curacare/screens/login_screen.dart'; 
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -12,14 +13,15 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
-  var kPrimaryGreen = Color(0xFF2ECC71);
-  var kSoftGreen = Color(0xFFE9FBF3);
-  var textGreen = Color.fromARGB(255, 0, 153, 5);
+  var kPrimaryGreen = const Color(0xFF2ECC71);
+  var kSoftGreen = const Color(0xFFE9FBF3);
+  var textGreen = const Color.fromARGB(255, 0, 153, 5);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Column(
+        title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -33,12 +35,12 @@ class _SettingPageState extends State<SettingPage> {
           Stack(
             children: [
               Container(
-                padding: EdgeInsets.all(12),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: kPrimaryGreen,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.favorite, color: Colors.white, size: 22),
+                child: const Icon(Icons.favorite, color: Colors.white, size: 22),
               ),
               Positioned(
                 top: 0,
@@ -46,7 +48,7 @@ class _SettingPageState extends State<SettingPage> {
                 child: Container(
                   width: 10,
                   height: 10,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: Colors.orange,
                     shape: BoxShape.circle,
                   ),
@@ -54,30 +56,30 @@ class _SettingPageState extends State<SettingPage> {
               ),
             ],
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FormatCard(
+            const FormatCard(
               card_title: "Sarah Johnson",
               card_sup_title: "sarah.johnson@email.com",
               icon: Icons.person_outlined,
             ),
             Container(
-              margin: EdgeInsets.fromLTRB(0, 20, 0, 5),
-              child: Text("ข้อมูลการรักษา", style: TextStyle(fontSize: 20)),
+              margin: const EdgeInsets.fromLTRB(0, 20, 0, 5),
+              child: const Text("ข้อมูลการรักษา", style: TextStyle(fontSize: 20)),
             ),
-            FormatCard(
+            const FormatCard(
               card_title: "บันทึกโรค",
               card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกโรค",
               icon: Icons.favorite_border_outlined,
               screen: ChronicdiseasePage(),
             ),
-            FormatCard(
+            const FormatCard(
               card_title: "บันทึกยา",
               card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกยา",
               icon: Icons.article_outlined,
@@ -85,18 +87,36 @@ class _SettingPageState extends State<SettingPage> {
               screen: RegularmedicinePage(),
             ),
             Container(
-              margin: EdgeInsets.fromLTRB(0, 30, 0, 0),
-              child: FormatCard(
-                card_title: "Sign Out",
-                card_sup_title: "",
-                icon: Icons.logout,
-                color: Colors.red,
+              margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+              child: Stack(
+                children: [
+                  const FormatCard(
+                    card_title: "Sign Out",
+                    card_sup_title: "",
+                    icon: Icons.logout,
+                    color: Colors.red,
+                  ),
+                  Positioned.fill(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                            (route) => false,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(currentIndex: 4),
+      bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 4),
     );
   }
 }
