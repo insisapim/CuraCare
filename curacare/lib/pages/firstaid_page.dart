@@ -1,6 +1,8 @@
+import 'package:curacare/pages/firstaid_data_page.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:curacare/widgets/format_card.dart';
 import 'package:flutter/material.dart';
+import 'package:curacare/models/firstaidmockdata.dart';
 
 class FirstaidPage extends StatefulWidget {
   const FirstaidPage({super.key});
@@ -49,36 +51,96 @@ class _FirstaidPageState extends State<FirstaidPage> {
                 card_sup_title: "การช่วยชีวิตด้วยการปั๊มหัวใจและผายปอด",
                 icon: Icons.favorite_border_outlined,
                 color: Colors.red,
+                toScreen: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FirstaidDataPage(
+                        data: mockFirstaidList[0],
+                      ),
+                    ),
+                  );
+                },
               ),
               FormatCard(
                 card_title: "ไฟลวก",
                 card_sup_title: "การรักษาแผลไหม้จากความร้อน",
                 icon: Icons.local_fire_department,
                 color: Colors.orangeAccent,
+                toScreen: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FirstaidDataPage(
+                        data: mockFirstaidList[1],
+                      ),
+                    ),
+                  );
+                },
               ),
               FormatCard(
                 card_title: "อาหารติดคอ",
                 card_sup_title: "การช่วยชีวิตภาวะอุดตันทางเดินหายใจ",
                 icon: Icons.airline_seat_flat,
                 color: Colors.green,
+                toScreen: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FirstaidDataPage(
+                        data: mockFirstaidList[2],
+                      ),
+                    ),
+                  );
+                },
               ),
               FormatCard(
                 card_title: "เลือดออกรุนแรง",
                 card_sup_title: "การควบคุมการเสียเลือดมาก",
                 icon: Icons.water_drop,
                 color: Colors.red,
+                toScreen: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FirstaidDataPage(
+                        data: mockFirstaidList[3],
+                      ),
+                    ),
+                  );
+                },
               ),
               FormatCard(
                 card_title: "ช็อก",
                 card_sup_title: "การรับรู้และการรักษาภาวะช็อก",
                 icon: Icons.bolt,
                 color: Colors.blue,
+                toScreen: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FirstaidDataPage(
+                        data: mockFirstaidList[4],
+                      ),
+                    ),
+                  );
+                },
               ),
               FormatCard(
                 card_title: "การโดนยาพิษ",
                 card_sup_title: "การรับมือกับเหตุฉุกเฉินจากการได้รับสารพิษ",
                 icon: Icons.bug_report,
                 color: const Color.fromARGB(255, 199, 179, 0),
+                toScreen: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FirstaidDataPage(
+                        data: mockFirstaidList[5],
+                      ),
+                    ),
+                  );
+                },
               ),
             ],
           ),

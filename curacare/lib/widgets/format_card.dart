@@ -8,6 +8,7 @@ class FormatCard extends StatelessWidget {
   final Color? backgroundColor;
   final Color? textcolor;
   final Widget? screen;
+  final VoidCallback? toScreen;
   const FormatCard({
     super.key,
     required this.card_title,
@@ -17,6 +18,7 @@ class FormatCard extends StatelessWidget {
     this.backgroundColor,
     this.textcolor,
     this.screen,
+    this.toScreen
   });
 
   @override
@@ -32,14 +34,7 @@ class FormatCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: InkWell(
         borderRadius: BorderRadius.circular(20),
-        onTap: () {
-          if (screen != null) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => screen!),
-            );
-          }
-        },
+        onTap: toScreen,
         child: Padding(
           padding: EdgeInsets.all(20),
           child: Row(
