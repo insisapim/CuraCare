@@ -73,18 +73,32 @@ class _SettingPageState extends State<SettingPage> {
               margin: const EdgeInsets.fromLTRB(0, 20, 0, 5),
               child: const Text("ข้อมูลการรักษา", style: TextStyle(fontSize: 20)),
             ),
-            const FormatCard(
+            FormatCard(
               card_title: "บันทึกโรค",
               card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกโรค",
               icon: Icons.favorite_border_outlined,
-              screen: ChronicdiseasePage(),
+              toScreen: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChronicdiseasePage(),
+                    ),
+                  );
+              }
             ),
-            const FormatCard(
+            FormatCard(
               card_title: "บันทึกยา",
               card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกยา",
               icon: Icons.article_outlined,
               color: Colors.blue,
-              screen: RegularmedicinePage(),
+              toScreen: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => RegularmedicinePage(),
+                    ),
+                  );
+              }
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),

@@ -34,7 +34,6 @@ class FirstaidDataPage extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _HeaderCard(data),
             _StepCard(stepSection),
             _WarningCard(warningSection),
           ],
@@ -44,29 +43,6 @@ class FirstaidDataPage extends StatelessWidget {
   }
 }
 
-class _HeaderCard extends StatelessWidget {
-  final FirstaidData data;
-  const _HeaderCard(this.data);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      color: Colors.red.shade50,
-      child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: Colors.red,
-          child: Icon(Icons.favorite, color: Colors.white),
-        ),
-        title: Text(
-          data.title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(data.description),
-      ),
-    );
-  }
-}
 
 class _StepCard extends StatelessWidget {
   final FirstaidSection section;
