@@ -6,7 +6,7 @@ import '../models/chronicdiseasedata.dart';
 class ChronicdiseaseApi {
   static Future<List<Chronicdiseasedata>> fetchDisease() async {
     final url = Uri.parse('http://10.0.2.2:5000/api/diseases');
-    final response = await http.get(url).timeout(Duration(seconds: 2));
+    final response = await http.get(url).timeout(Duration(seconds: 5));
 
     if (response.statusCode == 200) {
       final List<dynamic> rawList = jsonDecode(response.body);
