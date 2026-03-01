@@ -2,7 +2,6 @@ import 'package:curacare/pages/appointment_page.dart';
 import 'package:curacare/pages/firstaid_page.dart';
 import 'package:curacare/pages/homepage.dart';
 import 'package:curacare/pages/routine_page.dart';
-import 'package:curacare/pages/search_page.dart';
 import 'package:curacare/pages/setting_page.dart';
 import 'package:flutter/material.dart';
 

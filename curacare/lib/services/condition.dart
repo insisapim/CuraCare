@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curacare/models/condition.dart';
 import 'package:http/http.dart' as http;
 
@@ -10,11 +11,23 @@ Future<List<Condition>> getConditions(int page, String query) async {
     params.addAll({"query": query});
   }
 
-  final res = await http.get(Uri.http('10.0.2.2:4000', "/conditions", params));
+  final res = await http.get(Uri.http('10.0.2.2:8000', "/conditions", params));
 
   if (res.statusCode != 200) return [];
 
   final json = jsonDecode(res.body);
+
+  final db = FirebaseFirestore.instance;
+
+  String host = Platform.isAndroid ? "10.0.2.2" : "localhost";
+  db.useFirestoreEmulator(host, 8080);
+
+  await db.collection("conditions").get().then((event) {
+    print("reading collection");
+    for (var doc in event.docs) {
+      print("${doc.id} => ${doc.data()}");
+    }
+  });
 
   return (json["conditions"] as List)
       .map((condition) => Condition.fromJson(condition))
@@ -22,7 +35,7 @@ Future<List<Condition>> getConditions(int page, String query) async {
 }
 
 Future<Condition> getConditionById(String id) async {
-  final res = await http.get(Uri.parse("http://10.0.2.2:4000/conditions/$id"));
+  final res = await http.get(Uri.parse("http://10.0.2.2:8000/conditions/$id"));
 
   if (res.statusCode != 200) throw HttpException("Failed to load condition");
 
