@@ -1,8 +1,12 @@
+import 'dart:developer';
+import 'package:curacare/models/appointmentdata.dart';
 import 'package:curacare/pages/appointment_page.dart';
 import 'package:curacare/pages/firstaid_page.dart';
 import 'package:curacare/pages/search_page.dart';
+import 'package:curacare/services/appointments_api.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -26,6 +30,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    loadAppointments();
     // TODO: implement initState
     super.initState();
   }
@@ -83,124 +88,132 @@ class _HomePageState extends State<HomePage> {
       ),
     ],
   );
-
-  final Widget _buildTodayStatus = Card(
-    color: Colors.white,
-    child: Container(
-      margin: EdgeInsets.only(top: 24, bottom: 24),
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Stack(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Color(0xFFE9FBF3),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Icon(
-                            Icons.favorite_border_outlined,
-                            color: Colors.green,
-                            size: 40,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text("สถานะวันนี้", style: TextStyle(fontSize: 18)),
-                        Text(
-                          "สุขภาพดี!",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Spacer(),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Row(
+  int appointmentCount = 0;
+  void loadAppointments() async {
+  final data = await AppointmentsApi.fetchAppointment();
+  setState(() {
+    appointmentCount = data.length;
+  });
+}
+  Widget _buildTodayStatus() {
+    return Card(
+      color: Colors.white,
+      child: Container(
+        margin: EdgeInsets.only(top: 24, bottom: 24),
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Stack(
                         children: [
-                          Text(
-                            "ดูรายละเอียด",
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 0, 153, 5),
-                              fontSize: 18,
+                          Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Color(0xFFE9FBF3),
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: Color.fromARGB(255, 0, 153, 5),
+                            child: Icon(
+                              Icons.favorite_border_outlined,
+                              color: Colors.green,
+                              size: 40,
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      SizedBox(width: 16),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("สถานะวันนี้", style: TextStyle(fontSize: 18)),
+                          Text(
+                            "สุขภาพดี!",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Spacer(),
+                      GestureDetector(
+                        onTap: () {},
+                        child: Row(
+                          children: [
+                            Text(
+                              "ดูรายละเอียด",
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 0, 153, 5),
+                                fontSize: 18,
+                              ),
+                            ),
+                            Icon(
+                              Icons.chevron_right,
+                              color: Color.fromARGB(255, 0, 153, 5),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          Divider(color: Colors.grey.shade300, height: 32),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      "5",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
+            Divider(color: Colors.grey.shade300, height: 32),
+            Padding(
+              padding: EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        "5",
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text("กิจวัตรวันนี้", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      "2",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
+                      Text("กิจวัตรวันนี้", style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text(
+                        appointmentCount.toString(),
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    Text("นัดหมาย", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Text(
-                      "80%",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 0, 153, 5),
+                      Text("นัดหมาย", style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Text(
+                        "80%",
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Color.fromARGB(255, 0, 153, 5),
+                        ),
                       ),
-                    ),
-                    Text("ทำสำเร็จ", style: TextStyle(fontSize: 16)),
-                  ],
-                ),
-              ],
+                      Text("ทำสำเร็จ", style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +233,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
 
-            _buildTodayStatus,
+            _buildTodayStatus(),
             //กิจวัตร
             Container(
               margin: EdgeInsets.fromLTRB(0, 24, 0, 24),
@@ -313,25 +326,52 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             SizedBox(width: 20),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "กิจวัตรประจำวัน",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                            FutureBuilder<List<Appointmentdata>>(
+                              future: AppointmentsApi.fetchAppointment(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return CircularProgressIndicator();
+                                }
+
+                                final data = snapshot.data!;
+
+                                final appointment = data.first;
+
+                                return Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "นัดหมาย : ${appointment.title}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+
+                                      SizedBox(height: 6),
+
+                                      Text(
+                                        DateFormat(
+                                          "d MMMM yyyy HH:mm",
+                                          "th",
+                                        ).format(
+                                          DateTime.parse(appointment.startTime),
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                SizedBox(height: 6),
-                                Text(
-                                  "แผนดูแลสุขภาพตามโรค",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Color.fromARGB(255, 92, 92, 92),
-                                  ),
-                                ),
-                              ],
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -486,9 +526,7 @@ class _HomePageState extends State<HomePage> {
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => FirstaidPage(),
-                        ),
+                        MaterialPageRoute(builder: (context) => FirstaidPage()),
                       );
                     },
                     child: Padding(

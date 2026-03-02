@@ -11,7 +11,7 @@ class ChronicdiseaseByIdApi {
 
     if (response.statusCode == 200) {
       final List<dynamic> rawList = jsonDecode(response.body);
-      log("Rawlist ===> ${rawList}");
+      // log("Rawlist ===> ${rawList}");
       final List<Chronicdiseasedata> result = [];
       for (final item in rawList) {
         result.add(Chronicdiseasedata.fromJson(item));
