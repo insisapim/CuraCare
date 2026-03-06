@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:curacare/pages/homepage.dart';
-import 'register_screen.dart';
+import 'register_page.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

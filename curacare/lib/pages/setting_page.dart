@@ -3,7 +3,7 @@ import 'package:curacare/pages/regularmedicine_page.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:curacare/widgets/format_card.dart';
 import 'package:flutter/material.dart';
-import 'package:curacare/screens/login_screen.dart'; 
+import 'package:curacare/pages/login_page.dart'; 
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
