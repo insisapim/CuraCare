@@ -74,7 +74,7 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
     _loadRoutines();
   }
 
-  //โหลดข้อมูลจาก SharedPreferences
+  //โหลดข้อมูลจาก SharedPreferences (TODO)
   Future<void> _loadRoutines() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? routinesString = prefs.getString('saved_routines');
@@ -87,7 +87,7 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
     _checkAndResetDailyProgress();
   }
 
-  //บันทึกข้อมูลลง SharedPreferences
+  //บันทึกข้อมูลลง SharedPreferences (TODO)
   Future<void> _saveRoutines() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String encoded = jsonEncode(routines.map((r) => r.toJson()).toList());
