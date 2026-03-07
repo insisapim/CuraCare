@@ -1,18 +1,18 @@
-import 'package:curacare/pages/chronicdisease_page.dart';
-import 'package:curacare/pages/regularmedicine_page.dart';
+import 'package:curacare/pages/homepage.dart';
+import 'package:curacare/pages/login_page.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:curacare/widgets/format_card.dart';
 import 'package:flutter/material.dart';
-import 'package:curacare/screens/login_screen.dart'; 
+import 'package:flutter/widgets.dart';
 
-class SettingPage extends StatefulWidget {
-  const SettingPage({super.key});
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
 
   @override
-  State<SettingPage> createState() => _SettingPageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _SettingPageState extends State<SettingPage> {
+class _ProfilePageState extends State<ProfilePage> {
   var kPrimaryGreen = const Color(0xFF2ECC71);
   var kSoftGreen = const Color(0xFFE9FBF3);
   var textGreen = const Color.fromARGB(255, 0, 153, 5);
@@ -40,7 +40,11 @@ class _SettingPageState extends State<SettingPage> {
                   color: kPrimaryGreen,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.favorite, color: Colors.white, size: 22),
+                child: const Icon(
+                  Icons.favorite,
+                  color: Colors.white,
+                  size: 22,
+                ),
               ),
               Positioned(
                 top: 0,
@@ -71,20 +75,21 @@ class _SettingPageState extends State<SettingPage> {
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(0, 20, 0, 5),
-              child: const Text("ข้อมูลการรักษา", style: TextStyle(fontSize: 20)),
+              child: const Text(
+                "ข้อมูลการรักษา",
+                style: TextStyle(fontSize: 20),
+              ),
             ),
             FormatCard(
               card_title: "บันทึกโรค",
               card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกโรค",
               icon: Icons.favorite_border_outlined,
               toScreen: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ChronicdiseasePage(),
-                    ),
-                  );
-              }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => HomePage()),
+                );
+              },
             ),
             FormatCard(
               card_title: "บันทึกยา",
@@ -92,13 +97,11 @@ class _SettingPageState extends State<SettingPage> {
               icon: Icons.article_outlined,
               color: Colors.blue,
               toScreen: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => RegularmedicinePage(),
-                    ),
-                  );
-              }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => HomePage()),
+                );
+              },
             ),
             Container(
               margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
@@ -117,7 +120,9 @@ class _SettingPageState extends State<SettingPage> {
                         onTap: () {
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                            MaterialPageRoute(
+                              builder: (context) => const LoginPage(),
+                            ),
                             (route) => false,
                           );
                         },

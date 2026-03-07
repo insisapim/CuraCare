@@ -1,17 +1,17 @@
-class Medicinedata {
-  final int id;
+class MedicineModel {
+  final String id;
   final String name;
   final String detail;
   
 
-  Medicinedata({
+  MedicineModel({
     required this.id,
     required this.name,
     required this.detail,
 
   });
-  factory Medicinedata.fromJson(Map<String, dynamic> json) {
-    return Medicinedata(
+  factory MedicineModel.fromJson(Map<String, dynamic> json) {
+    return MedicineModel(
       id: json['id'],
       name: json['name'],
       detail: json['detail'],

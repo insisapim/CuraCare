@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:curacare/models/firstaiddata.dart';
-import 'package:curacare/models/firstaidmockdata.dart';
 
 class FirstaidDataPage extends StatelessWidget {
   final FirstaidData data;

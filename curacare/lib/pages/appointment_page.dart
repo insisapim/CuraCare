@@ -246,26 +246,26 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       },
                     ),
                     SizedBox(height: 20),
-                    DropdownSearch<AppointmentTypeData>(
-                      items: _appTypeData,
-                      selectedItem: _selectedAppointmentType,
-                      itemAsString: (d) => d.name,
-                      popupProps: PopupProps.menu(
-                        showSearchBox: true,
-                        searchFieldProps: TextFieldProps(
-                          decoration: InputDecoration(
-                            labelText: "ค้นหาประเภทนัดหมาย",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        log('drodow valuew : ${value}');
-                        setState(() {
-                          _selectedAppointmentType = value;
-                        });
-                      },
-                    ),
+                    // DropdownSearch<AppointmentTypeData>(
+                    //   items: _appTypeData,
+                    //   selectedItem: _selectedAppointmentType,
+                    //   itemAsString: (d) => d.name,
+                    //   popupProps: PopupProps.menu(
+                    //     showSearchBox: true,
+                    //     searchFieldProps: TextFieldProps(
+                    //       decoration: InputDecoration(
+                    //         labelText: "ค้นหาประเภทนัดหมาย",
+                    //         border: OutlineInputBorder(),
+                    //       ),
+                    //     ),
+                    //   ),
+                    //   onChanged: (value) {
+                    //     log('drodow valuew : ${value}');
+                    //     setState(() {
+                    //       _selectedAppointmentType = value;
+                    //     });
+                    //   },
+                    // ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -471,26 +471,26 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       },
                     ),
                     SizedBox(height: 20),
-                    DropdownSearch<AppointmentTypeData>(
-                      items: _appTypeData,
-                      selectedItem: _selectedAppointmentType,
-                      itemAsString: (d) => d.name,
-                      popupProps: PopupProps.menu(
-                        showSearchBox: true,
-                        searchFieldProps: TextFieldProps(
-                          decoration: InputDecoration(
-                            labelText: "ค้นหาประเภทนัดหมาย",
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      onChanged: (value) {
-                        log('drodow valuew : ${value}');
-                        setState(() {
-                          _selectedAppointmentType = value;
-                        });
-                      },
-                    ),
+                    // DropdownSearch<AppointmentTypeData>(
+                    //   items: _appTypeData,
+                    //   selectedItem: _selectedAppointmentType,
+                    //   itemAsString: (d) => d.name,
+                    //   popupProps: PopupProps.menu(
+                    //     showSearchBox: true,
+                    //     searchFieldProps: TextFieldProps(
+                    //       decoration: InputDecoration(
+                    //         labelText: "ค้นหาประเภทนัดหมาย",
+                    //         border: OutlineInputBorder(),
+                    //       ),
+                    //     ),
+                    //   ),
+                    //   onChanged: (value) {
+                    //     log('drodow valuew : ${value}');
+                    //     setState(() {
+                    //       _selectedAppointmentType = value;
+                    //     });
+                    //   },
+                    // ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,

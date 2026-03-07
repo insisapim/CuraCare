@@ -1,6 +1,7 @@
-import 'package:curacare/models/condition.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:curacare/models/condition_model.dart';
 import 'package:curacare/pages/condition_detail_page.dart';
-import 'package:curacare/services/condition.dart';
+import 'package:curacare/services/condition_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -22,9 +23,10 @@ class _SearchPageState extends State<SearchPage> {
 
   final SearchController _searchController = SearchController();
 
-  final List<Condition> _conditions = [];
+  final List<ConditionModel> _conditions = [];
+  DocumentSnapshot? _lastDoc;
   bool _isLoading = false;
-  int _page = 0;
+  bool _hasMore = true;
 
   @override
   void dispose() {
@@ -72,24 +74,46 @@ class _SearchPageState extends State<SearchPage> {
   );
 
   Future<void> fetchConditions(String query) async {
-    if (_isLoading) return;
+    if (_isLoading || !_hasMore) return;
     _isLoading = true;
-    final conditions = await getConditions(_page, query);
+    final query = await ConditionService.get(8, _lastDoc, null);
+
+    if (query.isEmpty) {
+      setState(() {
+        _hasMore = false;
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final conditions = query.map((condition) {
+      final map = condition.data();
+      map["id"] = condition.id;
+      return ConditionModel.fromJson(map);
+    }).toList();
 
     setState(() {
       _conditions.addAll(conditions);
-      _page++;
+      _lastDoc = query.last;
       _isLoading = false;
     });
   }
 
-  Future<void> searchConditions(String query) async {
-    final conditions = await getConditions(0, query);
+  Future<void> searchConditions(String search) async {
+    final query = await ConditionService.get(8, null, search);
+
+    final conditions = query.map((condition) {
+      final map = condition.data();
+      map["id"] = condition.id;
+      return ConditionModel.fromJson(map);
+    }).toList();
 
     setState(() {
+      _hasMore = true;
       _conditions.clear();
-      _conditions.addAll(conditions);
-      _page = 1;
+      if (conditions.isNotEmpty) _conditions.addAll(conditions);
+      _lastDoc = query.lastOrNull;
+
       _isLoading = false;
     });
   }
@@ -102,7 +126,7 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  Widget _buildResult(List<Condition> conditionList) {
+  Widget _buildResult(List<ConditionModel> conditionList) {
     if (_conditions.isEmpty) {
       return Center(
         child: Padding(
@@ -120,16 +144,12 @@ class _SearchPageState extends State<SearchPage> {
       itemCount: conditionList.length,
       itemBuilder: (context, index) {
         final condition = conditionList[index];
-        String description = "";
-        if (condition.description != null) {
-          description = condition.description!;
-        }
         ListTile listTile = ListTile(
           title: Text(
             condition.name,
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
           ),
-          subtitle: Text(description),
+          subtitle: Text(condition.description),
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -165,7 +185,7 @@ class _SearchPageState extends State<SearchPage> {
           Expanded(child: _buildResult(_conditions)),
         ],
       ),
-      bottomNavigationBar: CustomBottomNavigationBar(currentIndex: 1),
+      bottomNavigationBar: CustomBottomNavigationBar(currentIndex: 0),
     );
   }
 }

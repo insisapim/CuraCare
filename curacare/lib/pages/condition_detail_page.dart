@@ -1,5 +1,5 @@
-import 'package:curacare/models/condition.dart';
-import 'package:curacare/services/condition.dart';
+import 'package:curacare/models/condition_model.dart';
+import 'package:curacare/services/condition_service.dart';
 import 'package:flutter/material.dart';
 
 class ConditionDetailPage extends StatefulWidget {
@@ -12,37 +12,55 @@ class ConditionDetailPage extends StatefulWidget {
 }
 
 class _ConditionDetailPageState extends State<ConditionDetailPage> {
-  late Future<Condition> condition;
+  late Future<ConditionModel?> _conditionFuture;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
-    condition = getConditionById(widget.conditionId);
+    _conditionFuture = _loadCondition();
   }
 
-  PreferredSizeWidget _buildAppBar(Condition condition) {
+  Future<ConditionModel?> _loadCondition() async {
+    final condition = await ConditionService.getById(widget.conditionId);
+    if (condition == null) return null;
+    ConditionService.increaseView(condition.id);
+    return condition;
+  }
+
+  Future<Image> _loadImage(String url) async {
+    return Image.network(url);
+  }
+
+  PreferredSizeWidget _buildAppBar(ConditionModel condition) {
     return AppBar(title: Text(condition.name));
   }
 
-  Widget _buildBody(Condition condition) {
-    String description = "";
-    if (condition.description != null) {
-      description = condition.description!;
-    }
-    String detail = "";
-    if (condition.detail != null) {
-      detail = condition.detail!;
-    }
-    return Center(
-      child: Column(
-        children: [Text(condition.name), Text(description), Text(detail)],
-      ),
+  Widget _buildBody(ConditionModel condition) {
+    return Column(
+      spacing: 10,
+      children: [
+        Text(condition.name, style: const TextStyle(fontSize: 20)),
+        Text("อาการ: ${condition.description}"),
+        Text(condition.detail),
+        FutureBuilder<Image>(
+          future: _loadImage(condition.imageUrl),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return const Icon(Icons.error, color: Colors.red);
+            } else if (snapshot.hasData) {
+              return snapshot.data!;
+            } else {
+              return const SizedBox.shrink();
+            }
+          },
+        ),
+      ],
     );
   }
 
-  Widget _buildScaffold(Condition condition) {
+  Widget _buildScaffold(ConditionModel condition) {
     return Scaffold(
       appBar: _buildAppBar(condition),
       body: _buildBody(condition),
@@ -51,16 +69,21 @@ class _ConditionDetailPageState extends State<ConditionDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: condition,
+    return FutureBuilder<ConditionModel?>(
+      future: _conditionFuture,
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return _buildScaffold(snapshot.data!);
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Center(child: Text("${snapshot.error}"));
+          return Center(child: Text("Error: ${snapshot.error}"));
+        } else if (snapshot.hasData) {
+          if (snapshot.data == null) {
+            Navigator.of(context).pop();
+          }
+          return _buildScaffold(snapshot.data!);
+        } else {
+          return const Center(child: Text("No data found"));
         }
-
-        return const CircularProgressIndicator();
       },
     );
   }

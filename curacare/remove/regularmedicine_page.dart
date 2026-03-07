@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_search/dropdown_search.dart';
-import 'package:curacare/models/medicinedata.dart';
-import 'package:curacare/services/medicinebyid_api.dart';
-import 'package:curacare/services/medicine_api.dart';
+import 'package:curacare/models/medicine_model.dart';
+import 'package:curacare/services/medicine_service.dart';
 import 'dart:developer';
 import 'dart:async';
 class RegularmedicinePage extends StatefulWidget {
@@ -13,24 +12,24 @@ class RegularmedicinePage extends StatefulWidget {
 }
 
 class _RegularmedicinePageState extends State<RegularmedicinePage> {
-  late Future<List<Medicinedata>> _MedicineFuture;
+  late Future<List<MedicineModel>> _MedicineFuture;
 
   @override
   void initState() {
     super.initState();
-    _MedicineFuture = MedicinebyidApi.fetchMedicine();
+    _MedicineFuture = MedicineService.get();
     _loadMedicineData();
     log('$_MedicineFuture');
   }
 
-  List<Medicinedata> _allMedicines = [];
+  List<MedicineModel> _allMedicines = [];
   bool _isLoading = true;
-  Medicinedata? _selectedMedicinedata;
+  MedicineModel? _selectedMedicinedata;
   int userid = 1;
 
   Future<void> _loadMedicineData() async {
     try {
-      final medicine_data = await MedicineApi.fetchMedicine();
+      final medicine_data = await MedicineService.get();
       setState(() {
         _allMedicines = medicine_data;
         if (_allMedicines.isNotEmpty) {
@@ -102,7 +101,7 @@ class _RegularmedicinePageState extends State<RegularmedicinePage> {
                   Column(
                     children: [
                       SizedBox(height: 20),
-                      DropdownSearch<Medicinedata>(
+                      DropdownSearch<MedicineData>(
                         items: _allMedicines,
                         selectedItem: _selectedMedicinedata,
                         itemAsString: (d) => d.name,
