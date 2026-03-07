@@ -12,7 +12,7 @@ class AppointmentTypeApi {
 
     if(response.statusCode == 200){
       final List<dynamic> rawList = jsonDecode(response.body);
-      log("Appointmenttype json data : ${rawList}");
+      // log("Appointmenttype json data : ${rawList}");
       final List<AppointmentTypeData> result = []; 
       for(final item in rawList){
         result.add(AppointmentTypeData.fromJson(item));
