@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "767054586096",
+    "project_id": "curacare-9e157",
+    "storage_bucket": "curacare-9e157.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:767054586096:android:369fcba7ce49bc30cf6235",
+        "android_client_info": {
+          "package_name": "com.example.curacare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "767054586096-mfvnoaj2n4qelb0bk2t6nfi0r4kknhdb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.curacare",
+            "certificate_hash": "f18ad4085e91a294834bbd7b316f247595fb7295"
+          }
+        },
+        {
+          "client_id": "767054586096-k35m07ud699jpn9pmc5gs6ms5jul0ffl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKXF7wr1MXaOK-fK_NcsDYyvOPL0kipUI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "767054586096-k35m07ud699jpn9pmc5gs6ms5jul0ffl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "767054586096-uuf32cddb99ccgp3048d8udtslpnerj8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.curacare"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
