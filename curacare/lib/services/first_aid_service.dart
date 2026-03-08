@@ -9,7 +9,7 @@ class FirstAidService {
     return data;
   }
 
-  static Future<DocumentSnapshot<Map<String, dynamic>>> fetchFirstAidById(
+  static Future<DocumentSnapshot<Map<String, dynamic>>> getById(
     String id,
   ) async {
     final data = await db.doc(id).get();

@@ -1,7 +1,7 @@
 import 'package:curacare/pages/appointment_page.dart';
 import 'package:curacare/pages/firstaid_page.dart';
 import 'package:curacare/pages/homepage.dart';
-import 'package:curacare/pages/login_page.dart';
+import 'package:curacare/pages/profile_page.dart';
 import 'package:curacare/pages/routine_page.dart';
 import 'package:flutter/material.dart';
 
@@ -21,7 +21,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
     RoutinePage(),
     AppointmentPage(),
     FirstaidPage(),
-    LoginPage(),
+    ProfilePage(),
   ];
   @override
   Widget build(BuildContext context) {

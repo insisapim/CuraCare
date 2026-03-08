@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curacare/models/condition_model.dart';
+import 'package:curacare/services/user_service.dart';
 
 class ConditionService {
   static final db = FirebaseFirestore.instance.collection("conditions");
@@ -40,5 +43,22 @@ class ConditionService {
     await db.collection("conditions").doc(id).update({
       "views": FieldValue.increment(1),
     });
+  }
+
+  static Future<List<ConditionModel>> getFromUser() async {
+    final user = await UserService.getByUid();
+    if (user == null) {
+      throw Exception("Unauthorized");
+    }
+    log(user.conditions.toString());
+    final data = await db
+        .where(FieldPath.documentId, whereIn: user.conditions)
+        .get();
+    log(data.docs.toString());
+    return (data.docs.map((condition) {
+      final map = condition.data();
+      map["id"] = condition.id;
+      return ConditionModel.fromJson(map);
+    })).toList();
   }
 }

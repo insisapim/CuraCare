@@ -32,7 +32,6 @@ class AppointmentCard extends StatelessWidget {
     var objectColor = color ?? const Color(0xFF2ECC71);
     var objectBackgroundColor =
         backgroundColor ?? const Color.fromARGB(255, 255, 255, 255);
-    var objectTextColor = textcolor ?? const Color.fromARGB(255, 0, 0, 0);
     var task = requireTask ?? "เพิ่มสิ่งที่จำเป็นต้องทำก่อนไปนัดหมาย";
     var formattedDate = DateFormat("d MMMM yyyy HH:mm", "th").format(dateTime);
     return Card(

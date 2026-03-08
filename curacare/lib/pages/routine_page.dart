@@ -1,50 +1,9 @@
 import 'dart:convert';
+import 'package:curacare/models/routine_model.dart';
+import 'package:curacare/services/routine_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class RoutineItem {
-  String title;
-  String detail;
-  String category;
-  TimeOfDay time;
-  String period;
-  bool isCompleted;
-  bool isActive;
-
-  RoutineItem({
-    required this.title,
-    required this.detail,
-    required this.category,
-    required this.time,
-    required this.period,
-    this.isCompleted = false,
-    this.isActive = true,
-  });
-
-  //แปลงเป็น JSON เซฟลงเครื่อง
-  Map<String, dynamic> toJson() => {
-        'title': title,
-        'detail': detail,
-        'category': category,
-        'hour': time.hour,
-        'minute': time.minute,
-        'period': period,
-        'isCompleted': isCompleted,
-        'isActive': isActive,
-      };
-
-  //แปลงจาก JSON กลับเป็น Object
-  factory RoutineItem.fromJson(Map<String, dynamic> json) => RoutineItem(
-        title: json['title'],
-        detail: json['detail'],
-        category: json['category'],
-        time: TimeOfDay(hour: json['hour'], minute: json['minute']),
-        period: json['period'],
-        isCompleted: json['isCompleted'],
-        isActive: json['isActive'],
-      );
-}
 
 class RoutinePage extends StatefulWidget {
   const RoutinePage({super.key});
@@ -59,7 +18,7 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
 
   bool isNotificationEnabled = true;
 
-  List<RoutineItem> routines = [];
+  late Future<List<RoutineModel>> _routines;
 
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
@@ -70,46 +29,20 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _loadRoutines();
-  }
-
-  //โหลดข้อมูลจาก SharedPreferences (TODO)
-  Future<void> _loadRoutines() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? routinesString = prefs.getString('saved_routines');
-    if (routinesString != null) {
-      Iterable decoded = jsonDecode(routinesString);
-      setState(() {
-        routines = decoded.map((e) => RoutineItem.fromJson(e)).toList();
-      });
-    }
     _checkAndResetDailyProgress();
+    _routines = RoutineService.get();
   }
 
-  //บันทึกข้อมูลลง SharedPreferences (TODO)
-  Future<void> _saveRoutines() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String encoded = jsonEncode(routines.map((r) => r.toJson()).toList());
-    await prefs.setString('saved_routines', encoded);
-  }
-
-  // ฟังก์ชันตรวจสอบและรีเซ็ตค่าเมื่อขึ้นวันใหม่
   Future<void> _checkAndResetDailyProgress() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? lastDateStr = prefs.getString('last_reset_date');
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    String? lastDateStr = pref.getString('last_reset_date');
     DateTime now = DateTime.now();
-    String todayStr = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    String todayStr =
+        "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-    // ถ้าข้ามวันหรือเปิดแอปครั้งแรก
     if (lastDateStr != todayStr) {
-      setState(() {
-        for (var item in routines) {
-          item.isCompleted = false;
-        }
-      });
-      await prefs.setString('last_reset_date', todayStr);
-      _saveRoutines();
+      await RoutineService.resetStatus();
+      await pref.setString('last_reset_date', todayStr);
     }
   }
 
@@ -122,32 +55,6 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  double get _progress {
-    if (routines.isEmpty) return 0.0;
-    int totalActive = routines.where((r) => r.isActive).length;
-    if (totalActive == 0) return 0.0;
-
-    int completed = routines.where((r) => r.isActive && r.isCompleted).length;
-    return completed / totalActive;
-  }
-
-  // ฟังก์ชันคำนวณช่วงเวลาจาก TimeOfDay
-  String _getPeriodFromTime(TimeOfDay time) {
-    int hour = time.hour;
-    // 05.00 - 11.59 -> เช้า
-    if (hour >= 5 && hour < 12) {
-      return 'เช้า';
-    }
-    // 12.00 - 16.59 -> บ่าย
-    else if (hour >= 12 && hour < 17) {
-      return 'บ่าย';
-    }
-    // 17.00 - 04.59 -> เย็น
-    else {
-      return 'เย็น';
-    }
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -155,180 +62,97 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text(
-          'กิจวัตร',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(
-              isNotificationEnabled
-                  ? Icons.notifications_active
-                  : Icons.notifications_off,
-              color: isNotificationEnabled ? kPrimaryGreen : Colors.grey,
-            ),
-            onPressed: () {
-              setState(() {
-                isNotificationEnabled = !isNotificationEnabled;
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(isNotificationEnabled
-                      ? "เปิดการแจ้งเตือนแล้ว"
-                      : "ปิดการแจ้งเตือนแล้ว"),
-                  duration: const Duration(milliseconds: 800),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 10),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildProgressBlock(),
-          Expanded(
-            child: routines.isEmpty ? _buildEmptyState() : _buildRoutineList(),
-          ),
-        ],
-      ),
-      floatingActionButton: routines.isNotEmpty
-          ? FloatingActionButton(
-              backgroundColor: kPrimaryGreen,
-              child: const Icon(Icons.add, color: Colors.white),
-              onPressed: () => _showRoutineFormDialog(),
-            )
-          : null,
-      bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 1),
-    );
-  }
-
-  Widget _buildProgressBlock() {
-    return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: kSoftGreen,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "ความคืบหน้าประจำวัน",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                "${(_progress * 100).toInt()}%",
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: kPrimaryGreen),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: _progress,
-              minHeight: 10,
-              backgroundColor: Colors.white,
-              valueColor: AlwaysStoppedAnimation<Color>(kPrimaryGreen),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: GestureDetector(
-        onTap: () => _showRoutineFormDialog(),
-        child: Container(
-          width: 300,
-          height: 200,
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade300, width: 2),
-            borderRadius: BorderRadius.circular(20),
-            color: Colors.grey.shade50,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.add_circle_outline,
-                  size: 60, color: Colors.grey.shade400),
-              const SizedBox(height: 10),
-              Text(
-                "เพิ่มกิจวัตรใหม่",
-                style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRoutineList() {
-    List<RoutineItem> morningList =
-        routines.where((r) => r.period == 'เช้า').toList();
-    List<RoutineItem> afternoonList =
-        routines.where((r) => r.period == 'บ่าย').toList();
-    List<RoutineItem> eveningList =
-        routines.where((r) => r.period == 'เย็น').toList();
-
-    return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+  Widget _buildScaffoldNotEmpty(
+    BuildContext context,
+    List<RoutineModel> routines,
+  ) => Scaffold(
+    backgroundColor: Colors.white,
+    appBar: _buildAppBar(context),
+    body: Column(
       children: [
-        if (morningList.isNotEmpty) ...[
-          _buildSectionHeader("ช่วงเช้า", Icons.wb_sunny_outlined),
-          ...morningList.map((item) => _buildRoutineCard(item)),
-        ],
-        if (afternoonList.isNotEmpty) ...[
-          _buildSectionHeader("ช่วงบ่าย", Icons.wb_sunny),
-          ...afternoonList.map((item) => _buildRoutineCard(item)),
-        ],
-        if (eveningList.isNotEmpty) ...[
-          _buildSectionHeader("ช่วงเย็น", Icons.nights_stay_outlined),
-          ...eveningList.map((item) => _buildRoutineCard(item)),
-        ],
-        const SizedBox(height: 80),
+        _buildProgressBlock(routines),
+        Expanded(child: _buildRoutineList(routines)),
       ],
-    );
-  }
+    ),
+    floatingActionButton: routines.isNotEmpty
+        ? FloatingActionButton(
+            backgroundColor: kPrimaryGreen,
+            child: const Icon(Icons.add, color: Colors.white),
+            onPressed: () => _showRoutineFormDialog(),
+          )
+        : null,
+    bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 1),
+  );
 
-  Widget _buildSectionHeader(String title, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.orange),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ],
+  Widget _buildScaffoldEmpty(
+    BuildContext context,
+    List<RoutineModel> routines,
+  ) => Scaffold(
+    backgroundColor: Colors.white,
+    appBar: _buildAppBar(context),
+    body: _buildEmptyState,
+    bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 1),
+  );
+
+  Widget _buildPage(BuildContext context) => FutureBuilder(
+    future: _routines,
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return Center(child: Text("ขออภัย เกิดข้อผิดพลาดระหว่างดึงข้อมูล"));
+      }
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: Text("โหลดข้อมูล"));
+      }
+
+      if (!snapshot.hasData || snapshot.data == null) {
+        return Center(child: Text("ขออภัย เกิดข้อผิดพลาดระหว่างดึงข้อมูล"));
+      }
+
+      final data = snapshot.data!;
+      if (data.isEmpty) {
+        return _buildScaffoldEmpty(context, data);
+      }
+
+      return _buildScaffoldNotEmpty(context, data);
+    },
+  );
+
+  PreferredSizeWidget _buildAppBar(BuildContext context) => AppBar(
+    title: const Text('กิจวัตร', style: TextStyle(fontWeight: FontWeight.bold)),
+    centerTitle: true,
+    backgroundColor: Colors.white,
+    elevation: 0,
+    actions: [
+      IconButton(
+        icon: Icon(
+          isNotificationEnabled
+              ? Icons.notifications_active
+              : Icons.notifications_off,
+          color: isNotificationEnabled ? kPrimaryGreen : Colors.grey,
+        ),
+        onPressed: () {
+          setState(() {
+            isNotificationEnabled = !isNotificationEnabled;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                isNotificationEnabled
+                    ? "เปิดการแจ้งเตือนแล้ว"
+                    : "ปิดการแจ้งเตือนแล้ว",
+              ),
+              duration: const Duration(milliseconds: 800),
+            ),
+          );
+        },
       ),
-    );
-  }
+      const SizedBox(width: 10),
+    ],
+  );
 
-  Widget _buildRoutineCard(RoutineItem item) {
+  Widget _buildRoutineCard(RoutineModel item) {
     return Opacity(
-      opacity: item.isActive ? 1.0 : 0.5,
+      opacity: item.isCompleted ? 0.5 : 1,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
@@ -350,14 +174,18 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
           child: Row(
             children: [
               GestureDetector(
-                onTap: item.isActive
-                    ? () {
-                        setState(() {
-                          item.isCompleted = !item.isCompleted;
-                        });
-                        _saveRoutines();
-                      }
-                    : null,
+                onTap: () async {
+                  await RoutineService.update(
+                    item.id,
+                    item.title,
+                    item.detail,
+                    item.time,
+                    !item.isCompleted,
+                  );
+                  setState(() {
+                    _routines = RoutineService.get();
+                  });
+                },
                 child: Container(
                   width: 28,
                   height: 28,
@@ -403,15 +231,12 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
                         const SizedBox(width: 10),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 2),
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            item.category,
-                            style: TextStyle(
-                                fontSize: 10, color: Colors.grey.shade700),
                           ),
                         ),
                       ],
@@ -422,8 +247,11 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
 
               // ปุ่มแก้ไข
               IconButton(
-                icon: const Icon(Icons.edit_outlined,
-                    color: Colors.blue, size: 22),
+                icon: const Icon(
+                  Icons.edit_outlined,
+                  color: Colors.blue,
+                  size: 22,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: () => _showRoutineFormDialog(itemToEdit: item),
@@ -432,24 +260,14 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
 
               // ปุ่มลบ
               IconButton(
-                icon: const Icon(Icons.delete_outline,
-                    color: Colors.red, size: 22),
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: Colors.red,
+                  size: 22,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: () => _confirmDelete(item),
-              ),
-              const SizedBox(width: 8),
-
-              // Switch เปิด/ปิด
-              Switch(
-                value: item.isActive,
-                activeColor: kPrimaryGreen,
-                onChanged: (val) {
-                  setState(() {
-                    item.isActive = val;
-                  });
-                  _saveRoutines();
-                },
               ),
             ],
           ),
@@ -458,8 +276,7 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
     );
   }
 
-  // ป๊อปอัพ confirmDelete
-  void _confirmDelete(RoutineItem item) {
+  void _confirmDelete(RoutineModel item) {
     showDialog(
       context: context,
       builder: (ctx) {
@@ -472,14 +289,13 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
               child: const Text("ยกเลิก", style: TextStyle(color: Colors.grey)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
-              onPressed: () {
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () async {
+                await RoutineService.remove(item.id);
                 setState(() {
-                  routines.remove(item);
+                  _routines = RoutineService.get();
                 });
-                _saveRoutines();
+
                 Navigator.of(ctx).pop();
               },
               child: const Text("ตกลง", style: TextStyle(color: Colors.white)),
@@ -490,14 +306,12 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
     );
   }
 
-  // เพิ่มและการแก้ไข
-  void _showRoutineFormDialog({RoutineItem? itemToEdit}) {
+  void _showRoutineFormDialog({RoutineModel? itemToEdit}) {
     bool isEditing = itemToEdit != null;
 
     if (isEditing) {
       _titleController.text = itemToEdit.title;
       _detailController.text = itemToEdit.detail;
-      _categoryController.text = itemToEdit.category;
       _selectedTime = itemToEdit.time;
     } else {
       _titleController.clear();
@@ -522,8 +336,9 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
                     children: [
                       TextFormField(
                         controller: _titleController,
-                        decoration:
-                            const InputDecoration(labelText: 'ชื่อกิจวัตร'),
+                        decoration: const InputDecoration(
+                          labelText: 'ชื่อกิจวัตร',
+                        ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'กรุณากรอกชื่อกิจวัตร';
@@ -537,8 +352,9 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
                       ),
                       TextFormField(
                         controller: _detailController,
-                        decoration:
-                            const InputDecoration(labelText: 'รายละเอียด (ไม่บังคับ)'),
+                        decoration: const InputDecoration(
+                          labelText: 'รายละเอียด (ไม่บังคับ)',
+                        ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return null;
@@ -570,25 +386,12 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
                             child: Text(
                               "เวลา: ${_selectedTime.format(context)}",
                               style: TextStyle(
-                                  fontSize: 16, color: kPrimaryGreen),
+                                fontSize: 16,
+                                color: kPrimaryGreen,
+                              ),
                             ),
                           ),
                         ],
-                      ),
-                      TextFormField(
-                        controller: _categoryController,
-                        decoration: const InputDecoration(
-                            labelText: 'หมวดหมู่ (ไม่บังคับ)'),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return null;
-                          }
-                          if (value.characters.length < 2 ||
-                              value.characters.length > 30) {
-                            return 'ต้องมีความยาว 2-30 ตัวอักษร';
-                          }
-                          return null;
-                        },
                       ),
                     ],
                   ),
@@ -597,53 +400,161 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("ยกเลิก",
-                      style: TextStyle(color: Colors.grey)),
+                  child: const Text(
+                    "ยกเลิก",
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: kPrimaryGreen,
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      if (isEditing) {
+                        await RoutineService.update(
+                          itemToEdit.id,
+                          _titleController.text.trim(),
+                          _detailController.text.trim(),
+                          _selectedTime,
+                          itemToEdit.isCompleted,
+                        );
+                      } else {
+                        RoutineService.add(
+                          _titleController.text.trim(),
+                          _detailController.text.trim(),
+                          _selectedTime,
+                        );
+                      }
                       setState(() {
-                        String detailText = _detailController.text.trim();
-                        String categoryText = _categoryController.text.trim();
-                        
-                        if (categoryText.isEmpty) {
-                          categoryText = 'ทั่วไป';
-                        }
-
-                        String autoPeriod = _getPeriodFromTime(_selectedTime);
-
-                        if (isEditing) {
-                          itemToEdit!.title = _titleController.text.trim();
-                          itemToEdit.detail = detailText;
-                          itemToEdit.category = categoryText;
-                          itemToEdit.time = _selectedTime;
-                          itemToEdit.period = autoPeriod;
-                        } else {
-                          routines.add(RoutineItem(
-                            title: _titleController.text.trim(),
-                            detail: detailText,
-                            category: categoryText,
-                            time: _selectedTime,
-                            period: autoPeriod,
-                          ));
-                        }
+                        _routines = RoutineService.get();
                       });
-                      _saveRoutines();
                       Navigator.pop(context);
                     }
                   },
-                  child: const Text("บันทึก",
-                      style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    "บันทึก",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             );
           },
         );
       },
+    );
+  }
+
+  Widget get _buildEmptyState => Center(
+    child: GestureDetector(
+      onTap: () => _showRoutineFormDialog(),
+      child: Container(
+        width: 300,
+        height: 200,
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300, width: 2),
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.grey.shade50,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.add_circle_outline,
+              size: 60,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "เพิ่มกิจวัตรใหม่",
+              style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Widget _buildRoutineList(List<RoutineModel> routines) {
+    return ListView.builder(
+      itemCount: routines.length,
+      itemBuilder: (context, index) {
+        final routine = routines[index];
+        return _buildRoutineCard(routine);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _buildPage(context);
+  }
+
+  Widget _buildProgressBlock(List<RoutineModel> routines) {
+    int completes = 0;
+    for (var routine in routines) {
+      if (routine.isCompleted) {
+        completes += 1;
+      }
+    }
+
+    final double progress = completes / routines.length;
+
+    return Container(
+      margin: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: kSoftGreen,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "ความคืบหน้าประจำวัน",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "${(progress * 100).toInt()}%",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: kPrimaryGreen,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 10,
+              backgroundColor: Colors.white,
+              valueColor: AlwaysStoppedAnimation<Color>(kPrimaryGreen),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 15),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.orange),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
     );
   }
 }

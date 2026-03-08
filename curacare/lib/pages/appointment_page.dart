@@ -1,12 +1,9 @@
 import 'dart:developer';
-import 'package:curacare/models/appointment_type_data.dart';
-import 'package:curacare/models/appointmentdata.dart';
-import 'package:curacare/services/appointment_type_api.dart';
-import 'package:curacare/services/appointments_api.dart';
+import 'package:curacare/models/appointment_model.dart';
+import 'package:curacare/services/appointment_service.dart';
 import 'package:curacare/widgets/appointment_card.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:table_calendar/table_calendar.dart';
@@ -19,69 +16,44 @@ class AppointmentPage extends StatefulWidget {
 }
 
 class _AppointmentPageState extends State<AppointmentPage> {
-  int userid = 1;
   final _titleController = TextEditingController();
   final _detailController = TextEditingController();
   final _locationController = TextEditingController();
-  DateTime _selectedDate = DateTime.now();
   final DateFormat _formatter = DateFormat("d MMMM yyyy HH:mm", "th");
-  final _dateStartController = TextEditingController();
-  final _dateEndController = TextEditingController();
+  final _dateTimeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  List<AppointmentTypeData> _appTypeData = [];
-  bool isEdiing = false;
-  int? _editingAppointmentId;
-  Map<DateTime, List<dynamic>> _events = {};
+
+  bool isEdit = false;
+  String? _editingAppointmentId;
+  final Map<DateTime, List<dynamic>> _events = {};
   DateTime _calendarSelectedDate = DateTime.now();
 
-  late Future<List<Appointmentdata>> _appointmentFuture;
+  late Future<List<AppointmentModel>> _appointments;
   @override
   void initState() {
     super.initState();
-    _loadAppointmentTypeData();
 
-    _appointmentFuture = AppointmentsApi.fetchAppointment();
+    _appointments = AppointmentService.get();
     // log('_appointmentFuture : $_appointmentFuture');
   }
 
-  void clearControll() {
+  void clearController() {
     _titleController.clear();
     _locationController.clear();
     _detailController.clear();
-    _dateEndController.clear();
-    _dateStartController.clear();
-    setState(() {
-      _selectedAppointmentType = null;
-    });
+    _dateTimeController.clear();
   }
 
-  AppointmentTypeData? _selectedAppointmentType;
   @override
   void dispose() {
-    _dateStartController.dispose();
+    _dateTimeController.dispose();
     _titleController.dispose();
     _detailController.dispose();
     _locationController.dispose();
-    _dateEndController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadAppointmentTypeData() async {
-    try {
-      final apppointmenttype_data =
-          await AppointmentTypeApi.fetchAppointmenttype();
-      setState(() {
-        _appTypeData = apppointmenttype_data;
-        if (_appTypeData.isNotEmpty) {
-          _selectedAppointmentType = _appTypeData.first;
-        }
-      });
-    } catch (err) {
-      log("Fetch AppointmentType fail Error : ${err}");
-    }
-  }
-
-  Future<void> _selectStartDate(BuildContext context) async {
+  Future<void> _selectDateTime(BuildContext context) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final DateTime? pickedDate = await showDatePicker(
@@ -108,49 +80,13 @@ class _AppointmentPageState extends State<AppointmentPage> {
       pickedTime.minute,
     );
 
-    _dateStartController.text = DateFormat(
+    _dateTimeController.text = DateFormat(
       "d MMMM yyyy HH:mm",
       "th",
     ).format(finalDateTime);
   }
 
-  Future<void> _selectEndDate(BuildContext context) async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      firstDate: today,
-      lastDate: DateTime(2100),
-      initialDate: today,
-    );
-
-    if (pickedDate != null) {
-      setState(() {
-        _selectedDate = pickedDate;
-        _dateEndController.text = _formatter.format(_selectedDate);
-      });
-    }
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (pickedDate == null) return;
-
-    if (pickedTime == null) return;
-    final DateTime finalDateTime = DateTime(
-      pickedDate.year,
-      pickedDate.month,
-      pickedDate.day,
-      pickedTime.hour,
-      pickedTime.minute,
-    );
-    _dateEndController.text = DateFormat(
-      "d MMMM yyyy HH:mm",
-      "th",
-    ).format(finalDateTime);
-  }
-
-  Future<void> _deleteAppointment(int appointmentId) async {
+  Future<void> _deleteAppointment(String appointmentId) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -187,12 +123,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
     // ถ้ากด ยกเลิก หรือปิด dialog
     if (confirm != true) return;
     try {
-      await AppointmentsApi.deleteAppointment(
-        userId: userid,
-        appointmentId: appointmentId,
-      );
+      await AppointmentService.remove(appointmentId);
       setState(() {
-        _appointmentFuture = AppointmentsApi.fetchAppointment();
+        _appointments = AppointmentService.get();
       });
       ScaffoldMessenger.of(
         context,
@@ -216,7 +149,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
   @override
   Widget build(BuildContext context) {
     void openEditAppointment(BuildContext context) {
-      isEdiing = true;
+      isEdit = true;
       showDialog(
         barrierDismissible: false,
         context: context,
@@ -277,13 +210,13 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     ),
                     SizedBox(height: 20),
                     TextFormField(
-                      controller: _dateStartController,
+                      controller: _dateTimeController,
                       onTap: () {
-                        _selectStartDate(context);
+                        _selectDateTime(context);
                       },
 
                       decoration: const InputDecoration(
-                        labelText: 'แก้ไขเวลาเริ่มการนัดหมาย',
+                        labelText: 'แก้ไขเวลานัดหมาย',
                         hintText: "เช่น 1 มีนาคม 2026 14:30",
                         suffixIcon: Icon(Icons.calendar_today),
                         border: OutlineInputBorder(),
@@ -291,7 +224,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       validator: (value) {
                         // Add validation
                         if (value == null || value.isEmpty) {
-                          return 'กรุณากรอกเวลาเริ่มการนัดหมาย';
+                          return 'กรุณากรอกเวลานัดหมาย';
                         }
                         try {
                           final selectDate = DateFormat(
@@ -311,118 +244,31 @@ class _AppointmentPageState extends State<AppointmentPage> {
                         return null;
                       },
                     ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _dateEndController,
-                      onTap: () {
-                        _selectEndDate(context);
-                      },
-
-                      decoration: const InputDecoration(
-                        labelText: 'เวลาสิ้นสุดการนัดหมาย',
-                        hintText: "เช่น 1 มีนาคม 2026 15:30",
-                        suffixIcon: Icon(Icons.calendar_today),
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        // Add validation
-                        if (value == null || value.isEmpty) {
-                          return 'กรุณากรอกเวลาสิ้นสุดการนัดหมาย';
-                        }
-                        try {
-                          final selectDate = DateFormat(
-                            "d MMMM yyyy HH:mm",
-                            "th",
-                          ).parse(value);
-
-                          if (selectDate.isBefore(
-                            DateTime.now().subtract(Duration(days: 1)),
-                          )) {
-                            return 'ไม่สามารถเลือกวันที่ย้อนหลังได้';
-                          }
-                        } catch (err) {
-                          log("Error : $err");
-                          return 'รูปแบบวันที่ไม่ถูกต้อง';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    // DropdownSearch<AppointmentTypeData>(
-                    //   items: _appTypeData,
-                    //   selectedItem: _selectedAppointmentType,
-                    //   itemAsString: (d) => d.name,
-                    //   popupProps: PopupProps.menu(
-                    //     showSearchBox: true,
-                    //     searchFieldProps: TextFieldProps(
-                    //       decoration: InputDecoration(
-                    //         labelText: "ค้นหาประเภทนัดหมาย",
-                    //         border: OutlineInputBorder(),
-                    //       ),
-                    //     ),
-                    //   ),
-                    //   onChanged: (value) {
-                    //     log('drodow valuew : ${value}');
-                    //     setState(() {
-                    //       _selectedAppointmentType = value;
-                    //     });
-                    //   },
-                    // ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            if (_selectedAppointmentType == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("กรุณาเลือกประเภทนัดหมาย"),
-                                ),
-                              );
-                              return;
-                            }
                             if (_formKey.currentState!.validate()) {
                               final title = _titleController.text;
                               final detail = _detailController.text;
                               final location = _locationController.text;
-                              final appointmentType = _selectedAppointmentType;
-                              final startTime = _dateStartController.text;
-                              final endTime = _dateEndController.text;
-                              final userId = userid;
-                              if (appointmentType == null) return;
-                              final start = _formatter.parse(startTime);
-                              final end = _formatter.parse(endTime);
-
-                              if (end.isBefore(start)) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'วันสิ้นสุดต้องมากกว่าวันเริ่มต้น',
-                                    ),
-                                  ),
-                                );
-                                return;
-                              }
+                              final dateTime = _dateTimeController.text;
+                              final date = _formatter.parse(dateTime);
                               try {
-                                final start = _formatter.parse(startTime);
-                                final end = _formatter.parse(endTime);
-                                await AppointmentsApi.editAppointment(
-                                  id: _editingAppointmentId!,
-                                  title: title,
-                                  detail: detail,
-                                  userId: userId,
-                                  startTime: start.toIso8601String(),
-                                  endTime: end.toIso8601String(),
-                                  location: location,
-                                  appointmentType: appointmentType!.id,
+                                await AppointmentService.update(
+                                  _editingAppointmentId!,
+                                  title,
+                                  location,
+                                  date,
+                                  detail,
                                 );
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text("แก้ไขข้อมูลสำเร็จ")),
                                 );
                                 setState(() {
-                                  _appointmentFuture =
-                                      AppointmentsApi.fetchAppointment();
+                                  _appointments = AppointmentService.get();
                                 });
                                 Navigator.pop(context);
                               } catch (err) {
@@ -440,7 +286,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                         SizedBox(width: 10),
                         ElevatedButton(
                           onPressed: () {
-                            isEdiing = false;
+                            isEdit = false;
 
                             Navigator.pop(context);
                           },
@@ -518,13 +364,13 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     ),
                     SizedBox(height: 20),
                     TextFormField(
-                      controller: _dateStartController,
+                      controller: _dateTimeController,
                       onTap: () {
-                        _selectStartDate(context);
+                        _selectDateTime(context);
                       },
 
                       decoration: const InputDecoration(
-                        labelText: 'เวลาเริ่มการนัดหมาย',
+                        labelText: 'เวลานัดหมาย',
                         hintText: 'MM/dd/yyyy',
                         suffixIcon: Icon(Icons.calendar_today),
                         border: OutlineInputBorder(),
@@ -532,7 +378,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       validator: (value) {
                         // Add validation
                         if (value == null || value.isEmpty) {
-                          return 'กรุณากรอกเวลาเริ่มการนัดหมาย';
+                          return 'กรุณากรอกเวลานัดหมาย';
                         }
                         try {
                           final selectDate = DateFormat(
@@ -552,121 +398,32 @@ class _AppointmentPageState extends State<AppointmentPage> {
                         return null;
                       },
                     ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _dateEndController,
-                      onTap: () {
-                        _selectEndDate(context);
-                      },
 
-                      decoration: const InputDecoration(
-                        labelText: 'เวลาสิ้นสุดการนัดหมาย',
-                        hintText: "เช่น 1 มีนาคม 2026 14:30",
-                        suffixIcon: Icon(Icons.calendar_today),
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        // Add validation
-                        if (value == null || value.isEmpty) {
-                          return 'กรุณากรอกเวลาสิ้นสุดการนัดหมาย';
-                        }
-                        try {
-                          final selectDate = DateFormat(
-                            "d MMMM yyyy HH:mm",
-                            "th",
-                          ).parse(value);
-
-                          if (selectDate.isBefore(
-                            DateTime.now().subtract(Duration(days: 1)),
-                          )) {
-                            return 'ไม่สามารถเลือกวันที่ย้อนหลังได้';
-                          }
-                        } catch (err) {
-                          log("Error : $err");
-                          return 'รูปแบบวันที่ไม่ถูกต้อง';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    // DropdownSearch<AppointmentTypeData>(
-                    //   items: _appTypeData,
-                    //   selectedItem: _selectedAppointmentType,
-                    //   itemAsString: (d) => d.name,
-                    //   popupProps: PopupProps.menu(
-                    //     showSearchBox: true,
-                    //     searchFieldProps: TextFieldProps(
-                    //       decoration: InputDecoration(
-                    //         labelText: "ค้นหาประเภทนัดหมาย",
-                    //         border: OutlineInputBorder(),
-                    //       ),
-                    //     ),
-                    //   ),
-                    //   onChanged: (value) {
-                    //     log('drodow valuew : ${value}');
-                    //     setState(() {
-                    //       _selectedAppointmentType = value;
-                    //     });
-                    //   },
-                    // ),
                     SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            if (_selectedAppointmentType == null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text("กรุณาเลือกประเภทนัดหมาย"),
-                                ),
-                              );
-                              return;
-                            }
                             if (_formKey.currentState!.validate()) {
                               final title = _titleController.text;
                               final detail = _detailController.text;
                               final location = _locationController.text;
-                              final appointmentType = _selectedAppointmentType;
-                              final startTime = _dateStartController.text;
-                              final endTime = _dateEndController.text;
-                              final userId = userid;
-                              if (appointmentType == null) return;
-                              if (DateFormat("d MMMM yyyy HH:mm", "th")
-                                  .parse(endTime)
-                                  .isBefore(
-                                    DateFormat(
-                                      "d MMMM yyyy HH:mm",
-                                      "th",
-                                    ).parse(startTime),
-                                  )) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      'วันสิ้นสุดต้องมากกว่าวันเริ่มต้น',
-                                    ),
-                                  ),
-                                );
-                                return;
-                              }
+                              final dateTime = _dateTimeController.text;
+
                               try {
-                                final start = _formatter.parse(startTime);
-                                final end = _formatter.parse(endTime);
-                                await AppointmentsApi.addAppointment(
-                                  title: title,
-                                  detail: detail,
-                                  userId: userId,
-                                  startTime: start.toIso8601String(),
-                                  endTime: end.toIso8601String(),
-                                  location: location,
-                                  appointmentType: appointmentType!.id,
+                                final date = _formatter.parse(dateTime);
+                                await AppointmentService.add(
+                                  title,
+                                  location,
+                                  date,
+                                  detail,
                                 );
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(content: Text("บันทึกสำเร็จ")),
                                 );
                                 setState(() {
-                                  _appointmentFuture =
-                                      AppointmentsApi.fetchAppointment();
+                                  _appointments = AppointmentService.get();
                                 });
                                 Navigator.pop(context);
                               } catch (err) {
@@ -685,8 +442,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             if (_titleController.text.isNotEmpty ||
                                 _locationController.text.isNotEmpty ||
                                 _detailController.text.isNotEmpty ||
-                                _dateStartController.text.isNotEmpty ||
-                                _dateEndController.text.isNotEmpty) {
+                                _dateTimeController.text.isNotEmpty) {
                               final confirm = showDialog<bool>(
                                 context: context,
                                 builder: (context) {
@@ -766,8 +522,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
         actions: [
           ElevatedButton(
             onPressed: () async {
-              clearControll();
-              await _loadAppointmentTypeData();
+              clearController();
               openAppointmentInput(context);
             },
             child: Icon(Icons.add),
@@ -835,8 +590,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
           ),
 
           Expanded(
-            child: FutureBuilder<List<Appointmentdata>>(
-              future: _appointmentFuture,
+            child: FutureBuilder<List<AppointmentModel>>(
+              future: _appointments,
               builder: (context, snapshot) {
                 // log("snapshot.connectionState = ${snapshot.connectionState}");
                 // log("snapshot.hasData = ${snapshot.hasData}");
@@ -858,8 +613,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             icon: Icon(Icons.refresh),
                             onPressed: () {
                               setState(() {
-                                _appointmentFuture =
-                                    AppointmentsApi.fetchAppointment();
+                                _appointments = AppointmentService.get();
                               });
                             },
                           ),
@@ -873,16 +627,18 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(child: Text('ไม่พบข้อมูลนัดหมาย'));
                 }
-                final appointment_data = snapshot.data!;
-                if (appointment_data.isEmpty) {
+                final appointmentData = snapshot.data!;
+                if (appointmentData.isEmpty) {
                   return Center(child: Text("ไม่พบข้อมูลนัดหมาย"));
                 }
-                final appointmentData = snapshot.data!;
                 _events.clear();
 
                 for (var ap in appointmentData) {
-                  final date = DateTime.parse(ap.startTime);
-                  final normalized = DateTime(date.year, date.month, date.day);
+                  final normalized = DateTime(
+                    ap.dateTime.year,
+                    ap.dateTime.month,
+                    ap.dateTime.day,
+                  );
 
                   if (_events[normalized] == null) {
                     _events[normalized] = [];
@@ -893,8 +649,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 final filteredAppointments = _showAll
                     ? appointmentData
                     : appointmentData.where((ap) {
-                        final apDate = DateTime.parse(ap.startTime);
-                        return isSameDay(_calendarSelectedDate, apDate);
+                        return isSameDay(_calendarSelectedDate, ap.dateTime);
                       }).toList();
 
                 if (filteredAppointments.isEmpty) {
@@ -915,7 +670,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                           AppointmentCard(
                             title: appointment.title,
                             location: appointment.location,
-                            dateTime: DateTime.parse(appointment.startTime),
+                            dateTime: appointment.dateTime,
                             icon: Icons.local_hospital_outlined,
                             requireTask: appointment.detail,
                             onDelete: () {
@@ -926,16 +681,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
                               _titleController.text = appointment.title;
                               _detailController.text = appointment.detail;
                               _locationController.text = appointment.location;
-                              _dateStartController.text = _formatter.format(
-                                DateTime.parse(appointment.startTime),
+                              _dateTimeController.text = _formatter.format(
+                                appointment.dateTime,
                               );
-
-                              _dateEndController.text = _formatter.format(
-                                DateTime.parse(appointment.endTime),
-                              );
-                              setState(() {
-                                _selectedAppointmentType = appointment.app_type;
-                              });
                               _editingAppointmentId = appointment.id;
                               openEditAppointment(context);
                             },

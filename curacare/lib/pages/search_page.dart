@@ -158,6 +158,8 @@ class _SearchPageState extends State<SearchPage> {
               ),
             );
           },
+
+          trailing: IconButton(onPressed: () {}, icon: Icon(Icons.add)),
         );
 
         return _buildListTileCard(listTile);

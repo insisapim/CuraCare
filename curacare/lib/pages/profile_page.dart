@@ -1,7 +1,14 @@
+import 'dart:developer';
+
+import 'package:curacare/models/user_model.dart';
 import 'package:curacare/pages/homepage.dart';
 import 'package:curacare/pages/login_page.dart';
+import 'package:curacare/pages/user_condition_page.dart';
+import 'package:curacare/services/authentication_service.dart';
+import 'package:curacare/services/user_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:curacare/widgets/format_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -17,10 +24,21 @@ class _ProfilePageState extends State<ProfilePage> {
   var kSoftGreen = const Color(0xFFE9FBF3);
   var textGreen = const Color.fromARGB(255, 0, 153, 5);
 
+  User? get user => FirebaseAuth.instance.currentUser;
+  late Future<UserModel?> userProfile;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    userProfile = UserService.getByUid();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -68,11 +86,29 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const FormatCard(
-              card_title: "Sarah Johnson",
-              card_sup_title: "sarah.johnson@email.com",
-              icon: Icons.person_outlined,
+            FutureBuilder<UserModel?>(
+              future: userProfile,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return FormatCard(
+                    card_title: "โปรดเข้าสู่ระบบ",
+                    card_sup_title: "",
+                    icon: Icons.person_outlined,
+                    toScreen: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => LoginPage()),
+                    ),
+                  );
+                }
+                final userData = snapshot.data;
+                return FormatCard(
+                  card_title: userData!.username,
+                  card_sup_title: user?.email ?? "",
+                  icon: Icons.person_outlined,
+                );
+              },
             ),
+
             Container(
               margin: const EdgeInsets.fromLTRB(0, 20, 0, 5),
               child: const Text(
@@ -87,7 +123,7 @@ class _ProfilePageState extends State<ProfilePage> {
               toScreen: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => HomePage()),
+                  MaterialPageRoute(builder: (_) => UserConditionPage()),
                 );
               },
             ),
@@ -103,34 +139,54 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
               },
             ),
-            Container(
-              margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
-              child: Stack(
-                children: [
-                  const FormatCard(
-                    card_title: "Sign Out",
-                    card_sup_title: "",
-                    icon: Icons.logout,
-                    color: Colors.red,
-                  ),
-                  Positioned.fill(
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const LoginPage(),
-                            ),
-                            (route) => false,
-                          );
-                        },
+            FutureBuilder<UserModel?>(
+              future: userProfile,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("โหลดข้อมูล", style: TextStyle(fontSize: 20)),
+                    ],
+                  );
+                }
+                if (!snapshot.hasData) {
+                  return Container();
+                }
+                return Container(
+                  margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+                  child: Stack(
+                    children: [
+                      const FormatCard(
+                        card_title: "Sign Out",
+                        card_sup_title: "",
+                        icon: Icons.logout,
+                        color: Colors.red,
                       ),
-                    ),
+                      Positioned.fill(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: () async {
+                              log("sign");
+                              await AuthenticationService.signOut();
+                              log("out");
+                              setState(() {});
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginPage(),
+                                ),
+                                (route) => false, // ลบทุกหน้าออกจาก stack
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ],
         ),

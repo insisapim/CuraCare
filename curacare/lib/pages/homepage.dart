@@ -1,12 +1,11 @@
-import 'dart:developer';
-import 'package:curacare/models/appointmentdata.dart';
+
+import 'package:curacare/models/user_model.dart';
 import 'package:curacare/pages/appointment_page.dart';
 import 'package:curacare/pages/firstaid_page.dart';
 import 'package:curacare/pages/search_page.dart';
-import 'package:curacare/services/appointments_api.dart';
+import 'package:curacare/services/user_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -21,6 +20,8 @@ class _HomePageState extends State<HomePage> {
   var textGreen = Color.fromARGB(255, 0, 153, 5);
   final SearchController _searchController = SearchController();
 
+  late Future<UserModel?> userProfile;
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -30,9 +31,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    loadAppointments();
+    //loadAppointments();
     // TODO: implement initState
     super.initState();
+    userProfile = UserService.getByUid();
   }
 
   void searchConditions(String query) {
@@ -41,20 +43,49 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  final PreferredSizeWidget _buildAppBar = AppBar(
+  PreferredSizeWidget _buildAppBar(BuildContext) => AppBar(
     titleSpacing: 20,
     actionsPadding: EdgeInsets.all(10),
     automaticallyImplyLeading: false,
 
-    title: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("สวัสดีตอนบ่าย", style: TextStyle(fontSize: 20)),
-        Text(
-          "คุณสมศรี 👋",
-          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-        ),
-      ],
+    title: FutureBuilder(
+      future: userProfile,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [Text("โหลดข้อมูล", style: TextStyle(fontSize: 20))],
+          );
+        }
+        if (snapshot.hasError) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("ไม่สามารถหาผู้ใช้ได้", style: TextStyle(fontSize: 20)),
+            ],
+          );
+        }
+
+        if (!snapshot.hasData) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [Text("ยินดีต้อนรับ", style: TextStyle(fontSize: 20))],
+          );
+        }
+
+        final userData = snapshot.data;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("สวัสดีตอนบ่าย", style: TextStyle(fontSize: 20)),
+            Text(
+              "${userData!.username} 👋",
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            ),
+          ],
+        );
+      },
     ),
     toolbarHeight: 100,
     actions: [
@@ -89,12 +120,13 @@ class _HomePageState extends State<HomePage> {
     ],
   );
   int appointmentCount = 0;
-  void loadAppointments() async {
-  final data = await AppointmentsApi.fetchAppointment();
-  setState(() {
-    appointmentCount = data.length;
-  });
-}
+  // void loadAppointments() async {
+  //   final data = await AppointmentsApi.fetchAppointment();
+  //   setState(() {
+  //     appointmentCount = data.length;
+  //   });
+  // }
+
   Widget _buildTodayStatus() {
     return Card(
       color: Colors.white,
@@ -218,7 +250,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar,
+      appBar: _buildAppBar(context),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(22),
         child: Column(
@@ -326,53 +358,53 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             SizedBox(width: 20),
-                            FutureBuilder<List<Appointmentdata>>(
-                              future: AppointmentsApi.fetchAppointment(),
-                              builder: (context, snapshot) {
-                                if (!snapshot.hasData) {
-                                  return CircularProgressIndicator();
-                                }
+                            // FutureBuilder<List<Appointmentdata>>(
+                            //   future: AppointmentsApi.fetchAppointment(),
+                            //   builder: (context, snapshot) {
+                            //     if (!snapshot.hasData) {
+                            //       return CircularProgressIndicator();
+                            //     }
 
-                                final data = snapshot.data!;
+                            //     final data = snapshot.data!;
 
-                                final appointment = data.first;
+                            //     final appointment = data.first;
 
-                                return Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "นัดหมาย : ${appointment.title}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                            //     return Expanded(
+                            //       child: Column(
+                            //         crossAxisAlignment:
+                            //             CrossAxisAlignment.start,
+                            //         children: [
+                            //           Text(
+                            //             "นัดหมาย : ${appointment.title}",
+                            //             maxLines: 1,
+                            //             overflow: TextOverflow.ellipsis,
+                            //             style: TextStyle(
+                            //               fontSize: 18,
+                            //               fontWeight: FontWeight.bold,
+                            //             ),
+                            //           ),
 
-                                      SizedBox(height: 6),
+                            //           SizedBox(height: 6),
 
-                                      Text(
-                                        DateFormat(
-                                          "d MMMM yyyy HH:mm",
-                                          "th",
-                                        ).format(
-                                          DateTime.parse(appointment.startTime),
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
+                            //           Text(
+                            //             DateFormat(
+                            //               "d MMMM yyyy HH:mm",
+                            //               "th",
+                            //             ).format(
+                            //               DateTime.parse(appointment.startTime),
+                            //             ),
+                            //             maxLines: 1,
+                            //             overflow: TextOverflow.ellipsis,
+                            //             style: TextStyle(
+                            //               fontSize: 16,
+                            //               color: Colors.grey,
+                            //             ),
+                            //           ),
+                            //         ],
+                            //       ),
+                            //     );
+                            //   },
+                            // ),
                           ],
                         ),
                       ),

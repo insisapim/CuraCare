@@ -1,5 +1,4 @@
-import 'package:curacare/models/condition_model.dart';
-import 'package:curacare/models/medicine_model.dart';
+
 
 class UserModel {
   final String id;
@@ -19,8 +18,8 @@ class UserModel {
       id: json['id'],
       uid: json['uid'],
       username: json['username'],
-      medicines: json['medicines'],
-      conditions: json['conditions'],
+      medicines: List<String>.from(json['medicines']),
+      conditions: List<String>.from(json['conditions']),
     );
   }
 }

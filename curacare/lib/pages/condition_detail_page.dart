@@ -1,5 +1,9 @@
+import 'dart:developer';
+
 import 'package:curacare/models/condition_model.dart';
 import 'package:curacare/services/condition_service.dart';
+import 'package:curacare/services/user_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ConditionDetailPage extends StatefulWidget {
@@ -13,6 +17,8 @@ class ConditionDetailPage extends StatefulWidget {
 
 class _ConditionDetailPageState extends State<ConditionDetailPage> {
   late Future<ConditionModel?> _conditionFuture;
+
+  User? get user => FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
@@ -32,6 +38,20 @@ class _ConditionDetailPageState extends State<ConditionDetailPage> {
   }
 
   PreferredSizeWidget _buildAppBar(ConditionModel condition) {
+    log(user.toString());
+    if (user != null) {
+      return AppBar(
+        title: Text(condition.name),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await UserService.addCondition(conditionId: condition.id);
+            },
+            child: Text("บันทึก"),
+          ),
+        ],
+      );
+    }
     return AppBar(title: Text(condition.name));
   }
 

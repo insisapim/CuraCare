@@ -1,3 +1,7 @@
+import 'dart:developer';
+
+import 'package:curacare/services/authentication_service.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:curacare/pages/homepage.dart';
 import 'register_page.dart';
@@ -10,6 +14,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -20,7 +25,8 @@ class _LoginPageState extends State<LoginPage> {
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Center(
-          child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -105,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 const SizedBox(height: 50),
 
-                TextField(
+                TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
                     labelText: 'อีเมล',
@@ -114,10 +120,19 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     prefixIcon: const Icon(Icons.email_outlined),
                   ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Please enter email";
+                    }
+                    if (!EmailValidator.validate(value)) {
+                      return "Please enter valid email";
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
 
-                TextField(
+                TextFormField(
                   controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
@@ -127,6 +142,12 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     prefixIcon: const Icon(Icons.lock_outline),
                   ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "Please enter password";
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 30),
 
@@ -134,13 +155,39 @@ class _LoginPageState extends State<LoginPage> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {
-                      print("Login Success");
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => HomePage()),
-                        (route) => false,
-                      );
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('กำลังเข้าสู่ระบบ')),
+                        );
+                        log("sign");
+                        final authRes = await AuthenticationService.signIn(
+                          _emailController.text,
+                          _passwordController.text,
+                        );
+                        log("in");
+                        setState(() {});
+                        if (!mounted) return;
+                        if (!authRes.ok) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(authRes.message)),
+                          );
+                          return;
+                        }
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(
+                          context,
+                        ).showSnackBar(SnackBar(content: Text("สำเร็จ")));
+
+                        if (!mounted) return;
+                        if (!context.mounted) return;
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => HomePage()),
+                          (Route<dynamic> route) => false,
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green.shade600,
