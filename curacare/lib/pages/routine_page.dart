@@ -2,6 +2,7 @@ import 'package:curacare/models/routine_model.dart';
 import 'package:curacare/pages/login_page.dart';
 import 'package:curacare/services/routine_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
+import 'package:curacare/widgets/routine_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -66,234 +67,15 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
     }
   }
 
-  Widget _buildScaffoldNotEmpty(
-    BuildContext context,
-    List<RoutineModel> routines,
-  ) => Scaffold(
-    backgroundColor: Colors.white,
-    appBar: _buildAppBar(context),
-    body: Column(
-      children: [
-        _buildProgressBlock(routines),
-        Expanded(child: _buildRoutineList(routines)),
-      ],
-    ),
-    floatingActionButton: routines.isNotEmpty
-        ? FloatingActionButton(
-            backgroundColor: kPrimaryGreen,
-            child: const Icon(Icons.add, color: Colors.white),
-            onPressed: () => _showRoutineFormDialog(),
-          )
-        : null,
-    bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 1),
-  );
-
-  Widget _buildScaffoldEmpty(
-    BuildContext context,
-    List<RoutineModel> routines,
-  ) => Scaffold(
-    backgroundColor: Colors.white,
-    appBar: _buildAppBar(context),
-    body: _buildEmptyState,
-    bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 1),
-  );
-
-  Widget _buildPage(BuildContext context) => FutureBuilder(
-    future: _routines,
-    builder: (context, snapshot) {
-      if (snapshot.hasError) {
-        return Scaffold(
-          appBar: _buildAppBar(context),
-          body: Center(child: Text("ขออภัย เกิดข้อผิดพลาดระหว่างดึงข้อมูล")),
-        );
-      }
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Scaffold(
-          appBar: _buildAppBar(context),
-          body: Center(child: Text("โหลดข้อมูล")),
-        );
-      }
-
-      if (!snapshot.hasData || snapshot.data == null) {
-        return Scaffold(
-          appBar: _buildAppBar(context),
-          body: Center(child: Text("ขออภัย เกิดข้อผิดพลาดระหว่างดึงข้อมูล")),
-        );
-      }
-
-      final data = snapshot.data!;
-      if (data.isEmpty) {
-        return _buildScaffoldEmpty(context, data);
-      }
-
-      return _buildScaffoldNotEmpty(context, data);
-    },
-  );
-
   PreferredSizeWidget _buildAppBar(BuildContext context) => AppBar(
     title: const Text('กิจวัตร', style: TextStyle(fontWeight: FontWeight.bold)),
     centerTitle: true,
     backgroundColor: Colors.white,
     elevation: 0,
+    automaticallyImplyLeading: false,
   );
 
-  Widget _buildRoutineCard(RoutineModel item) {
-    return Opacity(
-      opacity: item.isCompleted ? 0.5 : 1,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-          ],
-          border: Border.all(
-            color: item.isCompleted ? kPrimaryGreen : Colors.grey.shade200,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  await RoutineService.update(
-                    item.id,
-                    item.title,
-                    item.detail,
-                    item.time,
-                    !item.isCompleted,
-                  );
-                  setState(() {
-                    _routines = RoutineService.get();
-                  });
-                },
-                child: Container(
-                  width: 28,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: item.isCompleted ? kPrimaryGreen : Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: item.isCompleted
-                          ? kPrimaryGreen
-                          : Colors.grey.shade400,
-                      width: 2,
-                    ),
-                  ),
-                  child: item.isCompleted
-                      ? const Icon(Icons.check, size: 18, color: Colors.white)
-                      : null,
-                ),
-              ),
-              const SizedBox(width: 15),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        decoration: item.isCompleted
-                            ? TextDecoration.lineThrough
-                            : TextDecoration.none,
-                        color: item.isCompleted ? Colors.grey : Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          "${item.time.format(context)} น.",
-                          style: TextStyle(fontSize: 12, color: kPrimaryGreen),
-                        ),
-                        const SizedBox(width: 10),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              // ปุ่มแก้ไข
-              IconButton(
-                icon: const Icon(
-                  Icons.edit_outlined,
-                  color: Colors.blue,
-                  size: 22,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () => _showRoutineFormDialog(itemToEdit: item),
-              ),
-              const SizedBox(width: 8),
-
-              // ปุ่มลบ
-              IconButton(
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: Colors.red,
-                  size: 22,
-                ),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                onPressed: () => _confirmDelete(item),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _confirmDelete(RoutineModel item) {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          title: const Text("ยืนยันการลบ"),
-          content: const Text("คุณต้องการลบกิจวัตรนี้ใช่หรือไม่?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text("ยกเลิก", style: TextStyle(color: Colors.grey)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              onPressed: () async {
-                await RoutineService.remove(item.id);
-                setState(() {
-                  _routines = RoutineService.get();
-                });
-
-                Navigator.of(ctx).pop();
-              },
-              child: const Text("ตกลง", style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showRoutineFormDialog({RoutineModel? itemToEdit}) {
+  void _showRoutineFormDialog(RoutineModel? itemToEdit) {
     bool isEditing = itemToEdit != null;
 
     if (isEditing) {
@@ -441,7 +223,7 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
           ).push(MaterialPageRoute(builder: (context) => LoginPage()));
           return;
         }
-        _showRoutineFormDialog();
+        _showRoutineFormDialog(null);
       },
       child: Container(
         width: 300,
@@ -475,14 +257,15 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
       itemCount: routines.length,
       itemBuilder: (context, index) {
         final routine = routines[index];
-        return _buildRoutineCard(routine);
+        return RoutineCard(
+          routine: routine,
+          voidCallback: () => setState(() {
+            _routines = RoutineService.get();
+          }),
+          openDialog: _showRoutineFormDialog,
+        );
       },
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _buildPage(context);
   }
 
   Widget _buildProgressBlock(List<RoutineModel> routines) {
@@ -534,6 +317,75 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildResult(List<RoutineModel> routines) => Column(
+    children: [
+      _buildProgressBlock(routines),
+      Expanded(child: _buildRoutineList(routines)),
+    ],
+  );
+
+  Widget _buildBody(BuildContext context) => FutureBuilder(
+    future: _routines,
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return Center(child: Text("ขออภัย เกิดข้อผิดพลาดระหว่างดึงข้อมูล"));
+      }
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator());
+      }
+
+      if (!snapshot.hasData || snapshot.data == null) {
+        return Center(child: Text("ขออภัย เกิดข้อผิดพลาดระหว่างดึงข้อมูล"));
+      }
+
+      final data = snapshot.data!;
+      if (data.isEmpty) {
+        return _buildEmptyState;
+      }
+
+      return _buildResult(data);
+    },
+  );
+
+  Widget _buildFloatingActionButton(BuildContext context) => FutureBuilder(
+    future: _routines,
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return Text("Error");
+      }
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return CircularProgressIndicator();
+      }
+
+      if (!snapshot.hasData) {
+        return Text("Error");
+      }
+
+      final routines = snapshot.data!;
+
+      if (routines.isEmpty) {
+        return Container();
+      }
+
+      return FloatingActionButton(
+        backgroundColor: kPrimaryGreen,
+        child: const Icon(Icons.add, color: Colors.white),
+        onPressed: () => _showRoutineFormDialog(null),
+      );
+    },
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: _buildAppBar(context),
+      body: _buildBody(context),
+      floatingActionButton: _buildFloatingActionButton(context),
+      bottomNavigationBar: CustomBottomNavigationBar(currentIndex: 1),
     );
   }
 }

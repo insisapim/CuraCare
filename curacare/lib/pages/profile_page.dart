@@ -31,82 +31,87 @@ class _ProfilePageState extends State<ProfilePage> {
     userProfile = UserService.getByUid();
   }
 
+  final PreferredSizeWidget _buildAppBar = AppBar(
+    automaticallyImplyLeading: false,
+    title: const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "โปรไฟล์",
+          style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+        ),
+        Text("การกำหนดและการตั้งค่า", style: TextStyle(fontSize: 18)),
+      ],
+    ),
+  );
+
+  Widget _buildProfileSection(BuildContext context) =>
+      FutureBuilder<UserModel?>(
+        future: userProfile,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return FormatCard(
+              card_title: "โปรดเข้าสู่ระบบ",
+              card_sup_title: "",
+              icon: Icons.person_outlined,
+              toScreen: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => LoginPage()),
+              ),
+            );
+          }
+          final userData = snapshot.data;
+          return FormatCard(
+            card_title: userData!.username,
+            card_sup_title: user?.email ?? "",
+            icon: Icons.person_outlined,
+          );
+        },
+      );
+
+  Widget _buildSignOutButton(BuildContext context) => FutureBuilder<UserModel?>(
+    future: userProfile,
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [Text("โหลดข้อมูล", style: TextStyle(fontSize: 20))],
+        );
+      }
+      if (!snapshot.hasData) {
+        return Container();
+      }
+      return TextButton(
+        onPressed: () async {
+          await FirebaseAuth.instance.signOut();
+          setState(() {
+            userProfile = UserService.getByUid();
+          });
+        },
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(Colors.red),
+          padding: WidgetStatePropertyAll(EdgeInsets.all(15)),
+          foregroundColor: WidgetStatePropertyAll(Colors.white),
+        ),
+        child: Text(
+          "ออกจากระบบ",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      );
+    },
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "โปรไฟล์",
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-            ),
-            Text("การกำหนดและการตั้งค่า", style: TextStyle(fontSize: 18)),
-          ],
-        ),
-        actions: [
-          Stack(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: kPrimaryGreen,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.favorite,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: const BoxDecoration(
-                    color: Colors.orange,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 16),
-        ],
-      ),
+      appBar: _buildAppBar,
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FutureBuilder<UserModel?>(
-              future: userProfile,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return FormatCard(
-                    card_title: "โปรดเข้าสู่ระบบ",
-                    card_sup_title: "",
-                    icon: Icons.person_outlined,
-                    toScreen: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => LoginPage()),
-                    ),
-                  );
-                }
-                final userData = snapshot.data;
-                return FormatCard(
-                  card_title: userData!.username,
-                  card_sup_title: user?.email ?? "",
-                  icon: Icons.person_outlined,
-                );
-              },
-            ),
-
+            _buildProfileSection(context),
             Container(
               margin: const EdgeInsets.fromLTRB(0, 20, 0, 5),
               child: const Text(
@@ -119,6 +124,13 @@ class _ProfilePageState extends State<ProfilePage> {
               card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกโรค",
               icon: Icons.favorite_border_outlined,
               toScreen: () {
+                if (FirebaseAuth.instance.currentUser == null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => LoginPage()),
+                  );
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => UserConditionPage()),
@@ -131,6 +143,13 @@ class _ProfilePageState extends State<ProfilePage> {
               card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกยา",
               icon: Icons.medical_information,
               toScreen: () {
+                if (FirebaseAuth.instance.currentUser == null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => LoginPage()),
+                  );
+                  return;
+                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => UserMedicinePage()),
@@ -138,39 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
             SizedBox(height: 20),
-            FutureBuilder<UserModel?>(
-              future: userProfile,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("โหลดข้อมูล", style: TextStyle(fontSize: 20)),
-                    ],
-                  );
-                }
-                if (!snapshot.hasData) {
-                  return Container();
-                }
-                return TextButton(
-                  onPressed: () async {
-                    await FirebaseAuth.instance.signOut();
-                    setState(() {
-                      userProfile = UserService.getByUid();
-                    });
-                  },
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(Colors.red),
-                    padding: WidgetStatePropertyAll(EdgeInsets.all(15)),
-                    foregroundColor: WidgetStatePropertyAll(Colors.white),
-                  ),
-                  child: Text(
-                    "ออกจากระบบ",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                );
-              },
-            ),
+            _buildSignOutButton(context),
           ],
         ),
       ),
