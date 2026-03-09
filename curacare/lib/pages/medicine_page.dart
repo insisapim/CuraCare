@@ -1,9 +1,9 @@
 import 'package:curacare/models/medicine_model.dart';
 import 'package:curacare/services/medicine_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
+import 'package:curacare/widgets/medicine_card.dart';
+import 'package:curacare/widgets/medicine_list_tile.dart';
 import 'package:flutter/material.dart';
-import 'package:curacare/models/user_model.dart';
-import 'package:curacare/services/user_service.dart';
 
 class MedicinePage extends StatefulWidget {
   const MedicinePage({super.key});
@@ -14,7 +14,6 @@ class MedicinePage extends StatefulWidget {
 
 class _MedicinePageState extends State<MedicinePage> {
   late Future<List<MedicineModel>> _medicines;
-  late Future<UserModel?> _userModelFuture;
 
   final SearchController _searchController = SearchController();
 
@@ -22,7 +21,6 @@ class _MedicinePageState extends State<MedicinePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _userModelFuture = UserService.getByUid();
     _medicines = MedicineService.get(null);
   }
 
@@ -33,7 +31,7 @@ class _MedicinePageState extends State<MedicinePage> {
     super.dispose();
   }
 
-  final PreferredSizeWidget _buildAppBar = AppBar(
+  PreferredSizeWidget _buildAppBar(BuildContext context) => AppBar(
     backgroundColor: Colors.white,
     title: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,30 +42,8 @@ class _MedicinePageState extends State<MedicinePage> {
         ),
       ],
     ),
-    automaticallyImplyLeading: false,
     toolbarHeight: 80,
   );
-
-  Widget _buildListTileCard(ListTile listTile) {
-    return Card(
-      color: const Color.fromARGB(255, 255, 255, 255),
-      margin: EdgeInsets.only(left: 10, top: 12, right: 10),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-        child: Row(
-          children: [
-            Icon(
-              Icons.medication_rounded,
-              color: const Color.fromARGB(255, 255, 109, 90),
-            ),
-            SizedBox(width: 10),
-            // แก้ตรงนี้: ใช้ Expanded หุ้ม item ไว้
-            Expanded(child: listTile),
-          ],
-        ),
-      ),
-    );
-  }
 
   Widget _buildResult(BuildContext context) => FutureBuilder(
     future: _medicines,
@@ -92,111 +68,36 @@ class _MedicinePageState extends State<MedicinePage> {
         itemCount: medicines.length,
         itemBuilder: (context, index) {
           final medicine = medicines[index];
-          ListTile listTile = ListTile(
-            title: Text(
-              medicine.name,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25),
-            ),
-            trailing: FutureBuilder(
-              future: _userModelFuture,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Text("Error");
-                }
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return CircularProgressIndicator();
-                }
-
-                if (!snapshot.hasData) {
-                  return Container();
-                }
-
-                final userProfile = snapshot.data!;
-
-                if (userProfile.medicines.contains(medicine.id)) {
-                  return TextButton(
-                    onPressed: () async {
-                      await UserService.removeMedicine(medicine.id);
-                      setState(() {
-                        _userModelFuture = UserService.getByUid();
-                      });
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Color.fromARGB(255, 255, 0, 0),
-
-                        borderRadius: BorderRadius.circular(
-                          15.0,
-                        ), // Apply border radius
-                      ),
-                      child: Text(
-                        "ลบบันทึก",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                return TextButton(
-                  onPressed: () async {
-                    await UserService.addMedicine(medicine.id);
-                    setState(() {
-                      _userModelFuture = UserService.getByUid();
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Color(0xFF2ECC71),
-
-                      borderRadius: BorderRadius.circular(
-                        15.0,
-                      ), // Apply border radius
-                    ),
-                    child: Text(
-                      "บันทึก",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
+          return MedicineCard(
+            listTile: MedicineListTile(medicine: medicine, voidCallBack: null),
           );
-
-          return _buildListTileCard(listTile);
         },
       );
     },
+  );
+
+  Widget _buildSearchBar(BuildContext context) => Padding(
+    padding: EdgeInsets.only(left: 4, right: 5),
+    child: SearchBar(
+      controller: _searchController,
+      hintText: "ค้นหาโรค อาการ...",
+      onSubmitted: (value) => setState(() {
+        _medicines = MedicineService.get(value);
+      }),
+      backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
+    ),
   );
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: _buildAppBar,
+      appBar: _buildAppBar(context),
       body: Column(
         spacing: 20,
         children: [
-          Padding(
-            padding: EdgeInsets.only(left: 4, right: 5),
-            child: SearchBar(
-              controller: _searchController,
-              hintText: "ค้นหาโรค อาการ...",
-              onSubmitted: (value) => setState(() {
-                _medicines = MedicineService.get(value);
-              }),
-              backgroundColor: WidgetStateProperty.all<Color>(Colors.white),
-            ),
-          ),
-
+          _buildSearchBar(context),
           Expanded(child: _buildResult(context)),
         ],
       ),

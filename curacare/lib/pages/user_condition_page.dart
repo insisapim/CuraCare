@@ -1,7 +1,8 @@
 import 'package:curacare/models/condition_model.dart';
-import 'package:curacare/pages/condition_detail_page.dart';
 import 'package:curacare/pages/search_page.dart';
 import 'package:curacare/services/condition_service.dart';
+import 'package:curacare/widgets/condition_card.dart';
+import 'package:curacare/widgets/condition_list_tile.dart';
 import 'package:flutter/material.dart';
 
 class UserConditionPage extends StatefulWidget {
@@ -28,23 +29,79 @@ class _UserConditionPageState extends State<UserConditionPage> {
     super.dispose();
   }
 
-  Widget _buildListTileCard(ListTile listTile) {
-    return Card(
-      color: const Color.fromARGB(255, 255, 255, 255),
-      margin: EdgeInsets.only(left: 10, top: 12, right: 10),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-        child: Row(
-          children: [
-            Icon(Icons.medical_services_outlined, color: Colors.blue),
-            SizedBox(width: 10),
-            // แก้ตรงนี้: ใช้ Expanded หุ้ม item ไว้
-            Expanded(child: listTile),
-          ],
+  Widget _buildAddButton(BuildContext context) => Padding(
+    padding: EdgeInsetsGeometry.all(8),
+
+    child: SizedBox(
+      width: double.infinity,
+      child: TextButton(
+        onPressed: () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => SearchPage()))
+              .then(
+                (_) => setState(() {
+                  _conditions = ConditionService.getFromUser();
+                }),
+              );
+        },
+
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(Colors.green.shade600),
+          foregroundColor: WidgetStatePropertyAll(Colors.white),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          elevation: WidgetStatePropertyAll(2),
+        ),
+        child: Text(
+          "เพิ่มโรค",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ),
-    );
-  }
+    ),
+  );
+
+  Widget _buildConditionList(BuildContext context) => Expanded(
+    child: FutureBuilder(
+      future: _conditions,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text(snapshot.error.toString()));
+        }
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData) {
+          return Center(child: Text("บันทึกโรคแรกของคุณกัน!"));
+        }
+
+        final data = snapshot.data!;
+
+        if (data.isEmpty) {
+          return Center(child: Text("บันทึกโรคแรกของคุณกัน!"));
+        }
+
+        return ListView.builder(
+          itemCount: data.length,
+          itemBuilder: (context, index) {
+            final condition = data[index];
+            return ConditionCard(
+              listTile: ConditionListTile(
+                condition: condition,
+                voidCallBack: () => setState(() {
+                  _conditions = ConditionService.getFromUser();
+                }),
+              ),
+              cardIcon: Icon(
+                Icons.medical_services_outlined,
+                color: Colors.blue,
+              ),
+            );
+          },
+        );
+      },
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -52,93 +109,7 @@ class _UserConditionPageState extends State<UserConditionPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(backgroundColor: Colors.white),
       body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsetsGeometry.all(8),
-
-            child: SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                onPressed: () {
-                  Navigator.of(
-                    context,
-                  ).push(MaterialPageRoute(builder: (context) => SearchPage())).then((_)=>setState(() {
-                    _conditions = ConditionService.getFromUser();
-                  }));
-                },
-
-                style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll(
-                    Colors.green.shade600,
-                  ),
-                  foregroundColor: WidgetStatePropertyAll(Colors.white),
-                  shape: WidgetStatePropertyAll(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  elevation: WidgetStatePropertyAll(2),
-                ),
-                child: Text(
-                  "เพิ่มโรค",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: FutureBuilder(
-              future: _conditions,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return Center(child: Text(snapshot.error.toString()));
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                if (!snapshot.hasData) {
-                  return Center(child: Text("บันทึกโรคแรกของคุณกัน!"));
-                }
-
-                final data = snapshot.data!;
-
-                if (data.isEmpty) {
-                  return Center(child: Text("บันทึกโรคแรกของคุณกัน!"));
-                }
-
-                return ListView.builder(
-                  itemCount: data.length,
-                  itemBuilder: (context, index) {
-                    final condition = data[index];
-
-                    ListTile listTile = ListTile(
-                      title: Text(
-                        condition.name,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 25,
-                        ),
-                      ),
-                      subtitle: Text(condition.description),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ConditionDetailPage(conditionId: condition.id),
-                          ),
-                        ).then((_)=>setState(() {
-                              _conditions = ConditionService.getFromUser();
-
-                        }));
-                      },
-                    );
-                    return _buildListTileCard(listTile);
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+        children: [_buildAddButton(context), _buildConditionList(context)],
       ),
     );
   }
