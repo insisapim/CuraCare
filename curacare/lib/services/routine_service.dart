@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curacare/models/routine_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,7 +15,11 @@ class RoutineService {
       return [];
     }
 
-    final data = await db.where("uid", isEqualTo: user.uid).get();
+    final data = await db
+        .where("uid", isEqualTo: user.uid)
+        .orderBy("time.hour")
+        .orderBy("time.minute")
+        .get();
 
     return (data.docs.map((routine) {
       final map = routine.data();
@@ -89,5 +95,29 @@ class RoutineService {
       return;
     }
     await data.reference.delete();
+  }
+
+  static Future<int> getPercent() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return 0;
+    }
+    final data = await db.where("uid", isEqualTo: user.uid).get();
+    final routines = (data.docs.map((routine) {
+      final map = routine.data();
+      map["id"] = routine.id;
+      return RoutineModel.fromJson(map);
+    })).toList();
+
+    int completes = 0;
+    for (var routine in routines) {
+      if (routine.isCompleted) {
+        completes += 1;
+      }
+    }
+ 
+    final double progress = completes / routines.length;
+
+    return (progress * 100).floor();
   }
 }

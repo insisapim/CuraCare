@@ -1,7 +1,8 @@
-import 'dart:convert';
 import 'package:curacare/models/routine_model.dart';
+import 'package:curacare/pages/login_page.dart';
 import 'package:curacare/services/routine_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -44,6 +45,9 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
       await RoutineService.resetStatus();
       await pref.setString('last_reset_date', todayStr);
     }
+    setState(() {
+      _routines = RoutineService.get();
+    });
   }
 
   @override
@@ -98,14 +102,23 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
     future: _routines,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return Center(child: Text("ขออภัย เกิดข้อผิดพลาดระหว่างดึงข้อมูล"));
+        return Scaffold(
+          appBar: _buildAppBar(context),
+          body: Center(child: Text("ขออภัย เกิดข้อผิดพลาดระหว่างดึงข้อมูล")),
+        );
       }
       if (snapshot.connectionState == ConnectionState.waiting) {
-        return Center(child: Text("โหลดข้อมูล"));
+        return Scaffold(
+          appBar: _buildAppBar(context),
+          body: Center(child: Text("โหลดข้อมูล")),
+        );
       }
 
       if (!snapshot.hasData || snapshot.data == null) {
-        return Center(child: Text("ขออภัย เกิดข้อผิดพลาดระหว่างดึงข้อมูล"));
+        return Scaffold(
+          appBar: _buildAppBar(context),
+          body: Center(child: Text("ขออภัย เกิดข้อผิดพลาดระหว่างดึงข้อมูล")),
+        );
       }
 
       final data = snapshot.data!;
@@ -122,32 +135,6 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
     centerTitle: true,
     backgroundColor: Colors.white,
     elevation: 0,
-    actions: [
-      IconButton(
-        icon: Icon(
-          isNotificationEnabled
-              ? Icons.notifications_active
-              : Icons.notifications_off,
-          color: isNotificationEnabled ? kPrimaryGreen : Colors.grey,
-        ),
-        onPressed: () {
-          setState(() {
-            isNotificationEnabled = !isNotificationEnabled;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                isNotificationEnabled
-                    ? "เปิดการแจ้งเตือนแล้ว"
-                    : "ปิดการแจ้งเตือนแล้ว",
-              ),
-              duration: const Duration(milliseconds: 800),
-            ),
-          );
-        },
-      ),
-      const SizedBox(width: 10),
-    ],
   );
 
   Widget _buildRoutineCard(RoutineModel item) {
@@ -447,7 +434,15 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
 
   Widget get _buildEmptyState => Center(
     child: GestureDetector(
-      onTap: () => _showRoutineFormDialog(),
+      onTap: () {
+        if (FirebaseAuth.instance.currentUser == null) {
+          Navigator.of(
+            context,
+          ).push(MaterialPageRoute(builder: (context) => LoginPage()));
+          return;
+        }
+        _showRoutineFormDialog();
+      },
       child: Container(
         width: 300,
         height: 200,
@@ -536,22 +531,6 @@ class _RoutinePageState extends State<RoutinePage> with WidgetsBindingObserver {
               backgroundColor: Colors.white,
               valueColor: AlwaysStoppedAnimation<Color>(kPrimaryGreen),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.orange),
-          const SizedBox(width: 8),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
       ),

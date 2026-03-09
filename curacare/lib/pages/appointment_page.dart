@@ -1,8 +1,10 @@
 import 'dart:developer';
 import 'package:curacare/models/appointment_model.dart';
+import 'package:curacare/pages/login_page.dart';
 import 'package:curacare/services/appointment_service.dart';
 import 'package:curacare/widgets/appointment_card.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
@@ -22,6 +24,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
   final DateFormat _formatter = DateFormat("d MMMM yyyy HH:mm", "th");
   final _dateTimeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final kPrimaryGreen = Color(0xFF2ECC71);
 
   bool isEdit = false;
   String? _editingAppointmentId;
@@ -508,7 +511,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -521,7 +526,17 @@ class _AppointmentPageState extends State<AppointmentPage> {
         ),
         actions: [
           ElevatedButton(
-            onPressed: () async {
+            style: ButtonStyle(
+              backgroundColor: WidgetStatePropertyAll(kPrimaryGreen),
+              iconColor: WidgetStatePropertyAll(Colors.white),
+            ),
+            onPressed: () {
+              if (FirebaseAuth.instance.currentUser == null) {
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (context) => LoginPage()));
+                return;
+              }
               clearController();
               openAppointmentInput(context);
             },

@@ -1,11 +1,27 @@
 import 'dart:developer';
 
+import 'package:algoliasearch/algoliasearch.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curacare/models/condition_model.dart';
+import 'package:curacare/models/search_condition_model.dart';
 import 'package:curacare/services/user_service.dart';
 
 class ConditionService {
   static final db = FirebaseFirestore.instance.collection("conditions");
+
+  static Future<List<SearchConditionModel>> search(String? query) async {
+    final client = SearchClient(
+      appId: "77DZOQTTBI",
+      apiKey: "fd8f421272e7b39099b7ac23bf808a65",
+    );
+    final queryHits = SearchForHits(indexName: "articles", query: query ?? "");
+    final responseHits = await client.searchIndex(request: queryHits);
+    client.dispose();
+
+    return (responseHits.hits.map(
+      (condition) => SearchConditionModel.fromJson(condition.toJson()),
+    )).toList();
+  }
 
   static Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> get(
     int limit,

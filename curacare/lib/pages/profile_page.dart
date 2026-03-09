@@ -37,6 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Column(
@@ -127,18 +128,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 );
               },
             ),
-            FormatCard(
-              card_title: "บันทึกยา",
-              card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกยา",
-              icon: Icons.article_outlined,
-              color: Colors.blue,
-              toScreen: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => HomePage()),
-                );
-              },
-            ),
+            SizedBox(height: 20),
             FutureBuilder<UserModel?>(
               future: userProfile,
               builder: (context, snapshot) {
@@ -153,37 +143,21 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (!snapshot.hasData) {
                   return Container();
                 }
-                return Container(
-                  margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
-                  child: Stack(
-                    children: [
-                      const FormatCard(
-                        card_title: "Sign Out",
-                        card_sup_title: "",
-                        icon: Icons.logout,
-                        color: Colors.red,
-                      ),
-                      Positioned.fill(
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () async {
-                              log("sign");
-                              await AuthenticationService.signOut();
-                              log("out");
-                              setState(() {});
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginPage(),
-                                ),
-                                (route) => false, // ลบทุกหน้าออกจาก stack
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
+                return TextButton(
+                  onPressed: () async {
+                    await FirebaseAuth.instance.signOut();
+                    setState(() {
+                      userProfile = UserService.getByUid();
+                    });
+                  },
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(Colors.red),
+                    padding: WidgetStatePropertyAll(EdgeInsets.all(15)),
+                    foregroundColor: WidgetStatePropertyAll(Colors.white),
+                  ),
+                  child: Text(
+                    "ออกจากระบบ",
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 );
               },

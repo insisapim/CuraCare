@@ -1,15 +1,20 @@
+import 'package:algoliasearch/algoliasearch.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curacare/models/appointment_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AppointmentService {
   static final db = FirebaseFirestore.instance.collection("appointments");
+  
   static Future<List<AppointmentModel>> get() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       return [];
     }
-    final data = await db.where("uid", isEqualTo: user.uid).get();
+    final data = await db
+        .where("uid", isEqualTo: user.uid)
+        .orderBy("dateTime")
+        .get();
     return (data.docs.map((appointment) {
       final map = appointment.data();
       Timestamp t = appointment.data()['dateTime'];
