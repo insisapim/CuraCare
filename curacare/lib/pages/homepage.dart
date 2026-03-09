@@ -9,6 +9,7 @@ import 'package:curacare/services/appointment_service.dart';
 import 'package:curacare/services/routine_service.dart';
 import 'package:curacare/services/user_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
+import 'package:curacare/widgets/homepage_navigate.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -159,8 +160,8 @@ class _HomePageState extends State<HomePage> {
                                     fontSize: 24,
                                   ),
                                 );
-                              }else if(percent < 50 && percent >= 25){
-                                  return Text(
+                              } else if (percent < 50 && percent >= 25) {
+                                return Text(
                                   "สุขภาพปกติ",
                                   style: TextStyle(
                                     color: Colors.yellow,
@@ -168,7 +169,7 @@ class _HomePageState extends State<HomePage> {
                                     fontSize: 24,
                                   ),
                                 );
-                              }else{
+                              } else {
                                 return Text(
                                   "อย่าลืมทำกิจวัตร!!",
                                   style: TextStyle(
@@ -453,7 +454,7 @@ class _HomePageState extends State<HomePage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(20),
                       onTap: () {
-                        Navigator.pushReplacement(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => AppointmentPage(),
@@ -561,200 +562,45 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            Column(
-              children: [
-                Card(
-                  color: Colors.white,
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
 
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => RoutinePage()),
-                      );
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Color(0xFFE9FBF3),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Icon(
-                                  Icons.assignment_outlined,
-                                  color: Color(0xFF2ECC71),
-                                  size: 28,
-                                ),
-                              ),
-                              Text(
-                                "กิจวัตรประจำวัน",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                "แผนดูแลสุขภาพตามโรค",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            HomepageNavigate(
+              card_title: "กิจวัตรประจำวัน",
+              card_sup_title: "แผนดูแลสุขภาพตามโรค",
+              icon: Icons.assignment_outlined,
+              toScreen: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => RoutinePage()),
+                );
+              },
+              color: Colors.green,
+              backgroundColor: Colors.green.withOpacity(0.15),
             ),
-            Column(
-              children: [
-                Card(
-                  color: Colors.white,
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => AppointmentPage(),
-                        ),
-                      );
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(
-                                    255,
-                                    213,
-                                    236,
-                                    255,
-                                  ),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Icon(
-                                  Icons.calendar_today_outlined,
-                                  color: Colors.blue,
-                                  size: 28,
-                                ),
-                              ),
-                              Text(
-                                "ปฏิทินนัดหมาย",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                "จัดการการนัดพบแพทย์",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            HomepageNavigate(
+              card_title: "ปฏิทินนัดหมาย",
+              card_sup_title: "จัดการการนัดหมายแพทย์",
+              icon: Icons.calendar_month_outlined,
+              toScreen: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AppointmentPage()),
+                );
+              },
+              color: Colors.blue,
+              backgroundColor: Colors.blue.withOpacity(0.15),
             ),
-
-            //คู่มือปฐมพยาบาล
-            Column(
-              children: [
-                Card(
-                  color: Colors.white,
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => FirstaidPage()),
-                      );
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.all(20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(
-                                    255,
-                                    255,
-                                    218,
-                                    219,
-                                  ),
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                child: Icon(
-                                  Icons.warning_amber_outlined,
-                                  color: Colors.red,
-                                  size: 28,
-                                ),
-                              ),
-                              Text(
-                                "คู่มือปฐมพยาบาล",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                "วิธีช่วยเหลือเบื้องต้น",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+            HomepageNavigate(
+              card_title: "คู่มือปฐมพยาบาล",
+              card_sup_title: "วิธีช่วยเหลือเบื้องต้น",
+              icon: Icons.warning_amber,
+              toScreen: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => FirstaidPage()),
+                );
+              },
+              color: Colors.red,
+              backgroundColor: Colors.red.withOpacity(0.15),
             ),
           ],
         ),
