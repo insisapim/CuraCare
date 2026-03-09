@@ -104,7 +104,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return "โปรดใส่ชื่อผู้ใช่";
+              return "โปรดกรอกชื่อผู้ใช่";
             }
             return null;
           },
@@ -112,6 +112,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
         TextFormField(
           controller: _emailController,
+          keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
             labelText: 'อีเมล',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -119,10 +120,10 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return "โปรดใส่อีเมล";
+              return "โปรดกรอกอีเมล";
             }
             if (EmailValidator.validate(value)) {
-              return "โปรดใส่อีเมลให้ถูกต้อง ตัวอย่าง user@email.com";
+              return "โปรดกรอกอีเมลให้ถูกต้อง ตัวอย่าง user@email.com";
             }
             return null;
           },
@@ -138,7 +139,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return "โปรดใส่รหัสผ่าน";
+              return "โปรดกรอกรหัสผ่าน";
             }
             return null;
           },
@@ -154,7 +155,7 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return "โปรดใส่รหัสผ่านอีกครั้ง";
+              return "โปรดกรอกรหัสผ่านอีกครั้ง";
             }
             return null;
           },
