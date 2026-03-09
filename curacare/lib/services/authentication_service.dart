@@ -9,16 +9,13 @@ class AuthenticationService {
     String password,
   ) async {
     try {
-      log("firebase signIn start");
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
-      log("firebase signIn success ${credential.user?.uid}");
 
       return AuthenticationResponse(ok: true, message: "Done");
     } on FirebaseAuthException catch (e) {
-      log(e.toString());
       if (e.code == 'user-not-found' || e.code == 'wrong-password') {
         return AuthenticationResponse(
           ok: false,
@@ -30,7 +27,6 @@ class AuthenticationService {
         message: "เกิดข้อผิดพลาดระหว่างเข้าสู่ระบบ",
       );
     } catch (e) {
-      log(e.toString());
       return AuthenticationResponse(
         ok: false,
         message: "เกิดข้อผิดพลาดระหว่างเข้าสู่ระบบ",

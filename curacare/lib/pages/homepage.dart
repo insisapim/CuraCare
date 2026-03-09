@@ -1,11 +1,14 @@
-
 import 'package:curacare/models/user_model.dart';
 import 'package:curacare/pages/appointment_page.dart';
 import 'package:curacare/pages/firstaid_page.dart';
+import 'package:curacare/pages/routine_page.dart';
 import 'package:curacare/pages/search_page.dart';
+import 'package:curacare/services/appointment_service.dart';
+import 'package:curacare/services/routine_service.dart';
 import 'package:curacare/services/user_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({super.key});
@@ -44,6 +47,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext) => AppBar(
+    backgroundColor: Colors.white,
     titleSpacing: 20,
     actionsPadding: EdgeInsets.all(10),
     automaticallyImplyLeading: false,
@@ -69,7 +73,12 @@ class _HomePageState extends State<HomePage> {
         if (!snapshot.hasData) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [Text("ยินดีต้อนรับ", style: TextStyle(fontSize: 20))],
+            children: [
+              Text(
+                "ยินดีต้อนรับ!",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ],
           );
         }
 
@@ -88,44 +97,7 @@ class _HomePageState extends State<HomePage> {
       },
     ),
     toolbarHeight: 100,
-    actions: [
-      Stack(
-        children: [
-          Stack(
-            children: [
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Color(0xFF2ECC71),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(Icons.favorite, color: Colors.white, size: 22),
-              ),
-              Positioned(
-                top: 0,
-                right: 0,
-                child: Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: Colors.orange,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ],
   );
-  int appointmentCount = 0;
-  // void loadAppointments() async {
-  //   final data = await AppointmentsApi.fetchAppointment();
-  //   setState(() {
-  //     appointmentCount = data.length;
-  //   });
-  // }
 
   Widget _buildTodayStatus() {
     return Card(
@@ -172,24 +144,6 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                       Spacer(),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Row(
-                          children: [
-                            Text(
-                              "ดูรายละเอียด",
-                              style: TextStyle(
-                                color: Color.fromARGB(255, 0, 153, 5),
-                                fontSize: 18,
-                              ),
-                            ),
-                            Icon(
-                              Icons.chevron_right,
-                              color: Color.fromARGB(255, 0, 153, 5),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ],
@@ -203,38 +157,96 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   Column(
                     children: [
-                      Text(
-                        "5",
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      FutureBuilder(
+                        future: RoutineService.get(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Text("error");
+                          }
+
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Text("โหลดข้อมูล");
+                          }
+
+                          if (!snapshot.hasData) {
+                            return Text("ไม่พบข้อมูล");
+                          }
+
+                          final data = snapshot.data!.length;
+                          return Text(
+                            data.toString(),
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        },
                       ),
+
                       Text("กิจวัตรวันนี้", style: TextStyle(fontSize: 16)),
                     ],
                   ),
                   Column(
                     children: [
-                      Text(
-                        appointmentCount.toString(),
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      FutureBuilder(
+                        future: AppointmentService.get(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Text("error");
+                          }
+
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Text("โหลดข้อมูล");
+                          }
+
+                          if (!snapshot.hasData) {
+                            return Text("ไม่พบข้อมูล");
+                          }
+
+                          final data = snapshot.data!.length;
+                          return Text(
+                            data.toString(),
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        },
                       ),
                       Text("นัดหมาย", style: TextStyle(fontSize: 16)),
                     ],
                   ),
                   Column(
                     children: [
-                      Text(
-                        "80%",
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromARGB(255, 0, 153, 5),
-                        ),
+                      FutureBuilder(
+                        future: RoutineService.getPercent(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasError) {
+                            return Text("error");
+                          }
+
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Text("โหลดข้อมูล");
+                          }
+
+                          if (!snapshot.hasData) {
+                            return Text("ไม่พบข้อมูล");
+                          }
+                          final percent = snapshot.data!;
+                          return Text(
+                            "${percent.toString()}%",
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 0, 153, 5),
+                            ),
+                          );
+                        },
                       ),
+
                       Text("ทำสำเร็จ", style: TextStyle(fontSize: 16)),
                     ],
                   ),
@@ -250,6 +262,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(context),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(22),
@@ -279,7 +292,13 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(20),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => RoutinePage(),
+                          ),
+                        );
+                      },
                       child: Padding(
                         padding: EdgeInsets.all(20),
                         child: Row(
@@ -298,25 +317,79 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             SizedBox(width: 20),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "กิจวัตรประจำวัน",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                            FutureBuilder(
+                              future: RoutineService.getNext(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return Text("error");
+                                }
+
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                }
+
+                                if (!snapshot.hasData) {
+                                  return Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "ไม่มีกิจวัตรต่อไป",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+
+                                        SizedBox(height: 6),
+                                      ],
+                                    ),
+                                  );
+                                }
+
+                                final routine = snapshot.data!;
+                                return Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "กิจวัตร : ${routine.title}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+
+                                      SizedBox(height: 6),
+
+                                      Text(
+                                        DateFormat("HH:mm", "th").format(
+                                          DateTime(
+                                            2000,
+                                            0,
+                                            0,
+                                            routine.time.hour,
+                                            routine.time.minute,
+                                          ),
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                SizedBox(height: 6),
-                                Text(
-                                  "แผนดูแลสุขภาพตามโรค",
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Color.fromARGB(255, 92, 92, 92),
-                                  ),
-                                ),
-                              ],
+                                );
+                              },
                             ),
                           ],
                         ),
@@ -339,7 +412,14 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(20),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AppointmentPage(),
+                          ),
+                        );
+                      },
                       child: Padding(
                         padding: EdgeInsets.all(20),
                         child: Row(
@@ -358,53 +438,73 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             SizedBox(width: 20),
-                            // FutureBuilder<List<Appointmentdata>>(
-                            //   future: AppointmentsApi.fetchAppointment(),
-                            //   builder: (context, snapshot) {
-                            //     if (!snapshot.hasData) {
-                            //       return CircularProgressIndicator();
-                            //     }
+                            FutureBuilder(
+                              future: AppointmentService.get(),
+                              builder: (context, snapshot) {
+                                if (!snapshot.hasData) {
+                                  return CircularProgressIndicator();
+                                }
 
-                            //     final data = snapshot.data!;
+                                final data = snapshot.data!;
 
-                            //     final appointment = data.first;
+                                if (data.isEmpty) {
+                                  return Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "เพิ่มนัดหมายแรกกันเถอะ!",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
 
-                            //     return Expanded(
-                            //       child: Column(
-                            //         crossAxisAlignment:
-                            //             CrossAxisAlignment.start,
-                            //         children: [
-                            //           Text(
-                            //             "นัดหมาย : ${appointment.title}",
-                            //             maxLines: 1,
-                            //             overflow: TextOverflow.ellipsis,
-                            //             style: TextStyle(
-                            //               fontSize: 18,
-                            //               fontWeight: FontWeight.bold,
-                            //             ),
-                            //           ),
+                                        SizedBox(height: 6),
+                                      ],
+                                    ),
+                                  );
+                                }
 
-                            //           SizedBox(height: 6),
+                                final appointment = data.first;
 
-                            //           Text(
-                            //             DateFormat(
-                            //               "d MMMM yyyy HH:mm",
-                            //               "th",
-                            //             ).format(
-                            //               DateTime.parse(appointment.startTime),
-                            //             ),
-                            //             maxLines: 1,
-                            //             overflow: TextOverflow.ellipsis,
-                            //             style: TextStyle(
-                            //               fontSize: 16,
-                            //               color: Colors.grey,
-                            //             ),
-                            //           ),
-                            //         ],
-                            //       ),
-                            //     );
-                            //   },
-                            // ),
+                                return Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "นัดหมาย : ${appointment.title}",
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+
+                                      SizedBox(height: 6),
+
+                                      Text(
+                                        DateFormat(
+                                          "d MMMM yyyy HH:mm",
+                                          "th",
+                                        ).format(appointment.dateTime),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                           ],
                         ),
                       ),
@@ -429,9 +529,15 @@ class _HomePageState extends State<HomePage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
+
                   child: InkWell(
                     borderRadius: BorderRadius.circular(20),
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => RoutinePage()),
+                      );
+                    },
                     child: Padding(
                       padding: EdgeInsets.all(20),
                       child: Row(

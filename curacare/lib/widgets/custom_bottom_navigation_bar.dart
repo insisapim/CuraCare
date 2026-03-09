@@ -26,6 +26,7 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      backgroundColor: Colors.white,
       type: BottomNavigationBarType.fixed,
       items: [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: "หน้าหลัก"),
@@ -42,9 +43,9 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
         if (value > pages.length) {
           return;
         }
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(builder: (context) => pages[value]),
-        );
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (context) => pages[value]));
       },
     );
   }

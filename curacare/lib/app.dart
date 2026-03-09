@@ -10,6 +10,7 @@ class App extends StatelessWidget {
       theme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
       ),
+
       home: HomePage(),
     );
   }

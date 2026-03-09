@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:curacare/models/condition_model.dart';
+import 'package:curacare/models/user_model.dart';
 import 'package:curacare/services/condition_service.dart';
 import 'package:curacare/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -17,94 +16,114 @@ class ConditionDetailPage extends StatefulWidget {
 
 class _ConditionDetailPageState extends State<ConditionDetailPage> {
   late Future<ConditionModel?> _conditionFuture;
+  late Future<UserModel?> _userModelFuture;
 
   User? get user => FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
-    _conditionFuture = _loadCondition();
+    _conditionFuture = ConditionService.getById(widget.conditionId);
+    _userModelFuture = UserService.getByUid();
   }
 
-  Future<ConditionModel?> _loadCondition() async {
-    final condition = await ConditionService.getById(widget.conditionId);
-    if (condition == null) return null;
-    ConditionService.increaseView(condition.id);
-    return condition;
-  }
+  PreferredSizeWidget _buildAppBar(BuildContext context) => AppBar(
+    actions: (user == null)
+        ? null
+        : [
+            FutureBuilder(
+              future: _userModelFuture,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Text("Error");
+                }
 
-  Future<Image> _loadImage(String url) async {
-    return Image.network(url);
-  }
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return CircularProgressIndicator();
+                }
 
-  PreferredSizeWidget _buildAppBar(ConditionModel condition) {
-    log(user.toString());
-    if (user != null) {
-      return AppBar(
-        title: Text(condition.name),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              await UserService.addCondition(conditionId: condition.id);
-            },
-            child: Text("บันทึก"),
+                if (!snapshot.hasData) {
+                  return Container();
+                }
+
+                final userProfile = snapshot.data!;
+
+                if (userProfile.conditions.contains(widget.conditionId)) {
+                  return TextButton(
+                    onPressed: () async {
+                      await UserService.removeCondition(
+                        conditionId: widget.conditionId,
+                      );
+                      setState(() {
+                        _userModelFuture = UserService.getByUid();
+                      });
+                    },
+                    child: Text("ลบบันทึก"),
+                  );
+                }
+
+                return TextButton(
+                  onPressed: () async {
+                    await UserService.addCondition(
+                      conditionId: widget.conditionId,
+                    );
+                  },
+                  child: Text("บันทึก"),
+                );
+              },
+            ),
+          ],
+  );
+
+  Widget _buildBody() => FutureBuilder(
+    future: _conditionFuture,
+    builder: (context, snapshot) {
+      if (snapshot.hasError) {
+        return Center(child: Text("ขออภัย เกิดข้อผิดพลาดในการดึงข้อมูลโรค"));
+      }
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Center(child: CircularProgressIndicator());
+      }
+
+      if (!snapshot.hasData) {
+        return Center(child: Text("ขออภัย ไม่พบข้อมูลโรคนี้"));
+      }
+
+      final condition = snapshot.data!;
+
+      return Padding(
+        padding: EdgeInsetsGeometry.all(10),
+        child: SingleChildScrollView(
+          child: Column(
+            spacing: 20,
+            children: [
+              Text(
+                condition.name,
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(condition.description, style: const TextStyle(fontSize: 20)),
+              Text(condition.detail, style: const TextStyle(fontSize: 17)),
+              Image.network(
+                condition.imageUrl,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  }
+                  return CircularProgressIndicator();
+                },
+              ),
+            ],
           ),
-        ],
-      );
-    }
-    return AppBar(title: Text(condition.name));
-  }
-
-  Widget _buildBody(ConditionModel condition) {
-    return Column(
-      spacing: 10,
-      children: [
-        Text(condition.name, style: const TextStyle(fontSize: 20)),
-        Text("อาการ: ${condition.description}"),
-        Text(condition.detail),
-        FutureBuilder<Image>(
-          future: _loadImage(condition.imageUrl),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
-            } else if (snapshot.hasError) {
-              return const Icon(Icons.error, color: Colors.red);
-            } else if (snapshot.hasData) {
-              return snapshot.data!;
-            } else {
-              return const SizedBox.shrink();
-            }
-          },
         ),
-      ],
-    );
-  }
-
-  Widget _buildScaffold(ConditionModel condition) {
-    return Scaffold(
-      appBar: _buildAppBar(condition),
-      body: _buildBody(condition),
-    );
-  }
+      );
+    },
+  );
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<ConditionModel?>(
-      future: _conditionFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text("Error: ${snapshot.error}"));
-        } else if (snapshot.hasData) {
-          if (snapshot.data == null) {
-            Navigator.of(context).pop();
-          }
-          return _buildScaffold(snapshot.data!);
-        } else {
-          return const Center(child: Text("No data found"));
-        }
-      },
-    );
+    return Scaffold(appBar: _buildAppBar(context), body: _buildBody());
   }
 }

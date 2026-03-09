@@ -18,6 +18,8 @@ dependencies:
   google_sign_in: ^7.2.0
   email_validator: ^3.0.0
   table_calendar: ^3.0.9
+  firebase_messaging: ^16.1.2
+  algoliasearch: ^1.46.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

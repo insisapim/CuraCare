@@ -15,6 +15,7 @@ class _FirstaidPageState extends State<FirstaidPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,9 +56,8 @@ class _FirstaidPageState extends State<FirstaidPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => FirstaidDataPage(
-                        data: mockFirstaidList[0],
-                      ),
+                      builder: (_) =>
+                          FirstaidDataPage(data: mockFirstaidList[0]),
                     ),
                   );
                 },
@@ -71,9 +71,8 @@ class _FirstaidPageState extends State<FirstaidPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => FirstaidDataPage(
-                        data: mockFirstaidList[1],
-                      ),
+                      builder: (_) =>
+                          FirstaidDataPage(data: mockFirstaidList[1]),
                     ),
                   );
                 },
@@ -87,9 +86,8 @@ class _FirstaidPageState extends State<FirstaidPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => FirstaidDataPage(
-                        data: mockFirstaidList[2],
-                      ),
+                      builder: (_) =>
+                          FirstaidDataPage(data: mockFirstaidList[2]),
                     ),
                   );
                 },
@@ -103,9 +101,8 @@ class _FirstaidPageState extends State<FirstaidPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => FirstaidDataPage(
-                        data: mockFirstaidList[3],
-                      ),
+                      builder: (_) =>
+                          FirstaidDataPage(data: mockFirstaidList[3]),
                     ),
                   );
                 },
@@ -119,9 +116,8 @@ class _FirstaidPageState extends State<FirstaidPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => FirstaidDataPage(
-                        data: mockFirstaidList[4],
-                      ),
+                      builder: (_) =>
+                          FirstaidDataPage(data: mockFirstaidList[4]),
                     ),
                   );
                 },
@@ -135,9 +131,8 @@ class _FirstaidPageState extends State<FirstaidPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => FirstaidDataPage(
-                        data: mockFirstaidList[5],
-                      ),
+                      builder: (_) =>
+                          FirstaidDataPage(data: mockFirstaidList[5]),
                     ),
                   );
                 },
