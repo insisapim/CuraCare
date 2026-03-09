@@ -25,16 +25,15 @@ class AuthenticationService {
 
       return AuthenticationResponse(ok: true, message: "Done");
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+      if (e.code == 'user-not-found' ||
+          e.code == 'wrong-password' ||
+          e.code == "invalid-credential") {
         return AuthenticationResponse(
           ok: false,
           message: "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
         );
       }
-      return AuthenticationResponse(
-        ok: false,
-        message: "เกิดข้อผิดพลาดระหว่างเข้าสู่ระบบ",
-      );
+      return AuthenticationResponse(ok: false, message: e.toString());
     } catch (e) {
       return AuthenticationResponse(
         ok: false,
@@ -61,10 +60,7 @@ class AuthenticationService {
       } else if (e.code == 'email-already-in-use') {
         return AuthenticationResponse(ok: false, message: "อีเมลนี้ถูกใช้แล้ว");
       }
-      return AuthenticationResponse(
-        ok: false,
-        message: "เกิดข้อผิดพลาดระหว่างลงทะเบียน",
-      );
+      return AuthenticationResponse(ok: false, message: e.toString());
     } catch (e) {
       log(e.toString());
       return AuthenticationResponse(

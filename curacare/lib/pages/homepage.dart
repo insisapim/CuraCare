@@ -454,7 +454,7 @@ class _HomePageState extends State<HomePage> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(20),
                       onTap: () {
-                        Navigator.pushReplacement(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => AppointmentPage(),
@@ -597,9 +597,7 @@ class _HomePageState extends State<HomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => FirstaidPage()),
-                  
                 );
-                
               },
               color: Colors.red,
               backgroundColor: Colors.red.withOpacity(0.15),

@@ -122,7 +122,7 @@ class _RegisterPageState extends State<RegisterPage> {
             if (value == null || value.trim().isEmpty) {
               return "โปรดกรอกอีเมล";
             }
-            if (EmailValidator.validate(value)) {
+            if (!EmailValidator.validate(value)) {
               return "โปรดกรอกอีเมลให้ถูกต้อง ตัวอย่าง user@email.com";
             }
             return null;
@@ -165,40 +165,45 @@ class _RegisterPageState extends State<RegisterPage> {
           height: 50,
           child: ElevatedButton(
             onPressed: () async {
-              if (!mounted) return;
-              if (_passwordController.text != _confirmPasswordController.text) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('โปรดกรอกรหัสผ่านทั้งสองช่องให้เหมือนกัน'),
-                  ),
-                );
-              }
+              if (_formKey.currentState!.validate()) {
+                if (!mounted) return;
+                if (_passwordController.text !=
+                    _confirmPasswordController.text) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('โปรดกรอกรหัสผ่านทั้งสองช่องให้เหมือนกัน'),
+                    ),
+                  );
+                  return;
+                }
 
-              if (!mounted) return;
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('กำลังลงทะเบียน')));
-              final authRes = await AuthenticationService.signUp(
-                _emailController.text,
-                _passwordController.text,
-                _usernameController.text,
-              );
-              if (!mounted) return;
-              if (!authRes.ok) {
+                if (!mounted) return;
                 ScaffoldMessenger.of(
                   context,
-                ).showSnackBar(SnackBar(content: Text(authRes.message)));
+                ).showSnackBar(const SnackBar(content: Text('กำลังลงทะเบียน')));
+                final authRes = await AuthenticationService.signUp(
+                  _emailController.text,
+                  _passwordController.text,
+                  _usernameController.text,
+                );
+                if (!mounted) return;
+                if (!authRes.ok) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(authRes.message)));
+                  return;
+                }
+                if (!mounted) return;
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("สำเร็จ")));
+                if (!mounted) return;
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                  (Route<dynamic> route) => false,
+                );
               }
-              if (!mounted) return;
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text("สำเร็จ")));
-              if (!mounted) return;
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
-                (Route<dynamic> route) => false,
-              );
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green.shade600,
@@ -246,6 +251,7 @@ class _RegisterPageState extends State<RegisterPage> {
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 20,
             children: [
               _buildHead,
               _buildForm(context),

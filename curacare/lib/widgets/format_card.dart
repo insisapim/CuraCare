@@ -18,7 +18,7 @@ class FormatCard extends StatelessWidget {
     this.backgroundColor,
     this.textcolor,
     this.screen,
-    this.toScreen
+    this.toScreen,
   });
 
   @override
@@ -63,7 +63,7 @@ class FormatCard extends StatelessWidget {
                   SizedBox(height: 6),
                   Text(
                     card_sup_title,
-                    style: TextStyle(fontSize: 14, color: objectTextColor),
+                    style: TextStyle(fontSize: 12, color: objectTextColor),
                   ),
                 ],
               ),
