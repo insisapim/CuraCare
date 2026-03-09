@@ -3,6 +3,7 @@ import 'package:curacare/models/appointment_model.dart';
 import 'package:curacare/pages/login_page.dart';
 import 'package:curacare/services/appointment_service.dart';
 import 'package:curacare/widgets/appointment_card.dart';
+import 'package:curacare/widgets/appointment_form.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -21,23 +22,28 @@ class _AppointmentPageState extends State<AppointmentPage> {
   final _titleController = TextEditingController();
   final _detailController = TextEditingController();
   final _locationController = TextEditingController();
-  final DateFormat _formatter = DateFormat("d MMMM yyyy HH:mm", "th");
   final _dateTimeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final kPrimaryGreen = Color(0xFF2ECC71);
 
-  bool isEdit = false;
-  String? _editingAppointmentId;
-  final Map<DateTime, List<dynamic>> _events = {};
+  final DateFormat _formatter = DateFormat("d MMMM yyyy HH:mm", "th");
   DateTime _calendarSelectedDate = DateTime.now();
 
-  late Future<List<AppointmentModel>> _appointments;
+  bool _showAll = true;
+
+  final Map<DateTime, List<dynamic>> _events = {};
+
+  late Future<List<AppointmentModel>> appointments;
+
   @override
   void initState() {
     super.initState();
+    appointments = AppointmentService.get();
+  }
 
-    _appointments = AppointmentService.get();
-    // log('_appointmentFuture : $_appointmentFuture');
+  void reload() {
+    setState(() {
+      appointments = AppointmentService.get();
+    });
   }
 
   void clearController() {
@@ -56,7 +62,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
     super.dispose();
   }
 
-  Future<void> _selectDateTime(BuildContext context) async {
+  Future<void> _selectDateTime() async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final DateTime? pickedDate = await showDatePicker(
@@ -72,9 +78,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
       context: context,
       initialTime: TimeOfDay.now(),
     );
-
     if (pickedTime == null) return;
-
     final DateTime finalDateTime = DateTime(
       pickedDate.year,
       pickedDate.month,
@@ -82,437 +86,177 @@ class _AppointmentPageState extends State<AppointmentPage> {
       pickedTime.hour,
       pickedTime.minute,
     );
-
     _dateTimeController.text = DateFormat(
       "d MMMM yyyy HH:mm",
       "th",
     ).format(finalDateTime);
   }
 
-  Future<void> _deleteAppointment(String appointmentId) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("ยืนยันการลบ"),
-          content: Text("คุณต้องการลบนัดหมายนี้ใช่หรือไม่"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  "ตกลง",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text("ยกเลิก"),
-            ),
-          ],
-        );
-      },
-    );
-
-    // ถ้ากด ยกเลิก หรือปิด dialog
-    if (confirm != true) return;
-    try {
-      await AppointmentService.remove(appointmentId);
-      setState(() {
-        _appointments = AppointmentService.get();
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("ลบสำเร็จ")));
-    } catch (e) {
-      log("Error : $e");
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("ลบไม่สำเร็จ")));
-    }
-  }
-
+  //เช็คว่าเป็นวันเดียวกันหรือไม่
   bool isSameDay(DateTime calendar_date, DateTime data_date) {
     return calendar_date.year == data_date.year &&
         calendar_date.month == data_date.month &&
         calendar_date.day == data_date.day;
   }
 
-  bool _showAll = true;
+  Future<void> deleteAppointment(String id) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("ยืนยันการลบ"),
+        content: const Text("ต้องการลบนัดหมายนี้หรือไม่"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text("ลบ"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("ยกเลิก"),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    try {
+      await AppointmentService.remove(id);
+      reload();
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("ลบสำเร็จ")));
+    } catch (e) {
+      log("delete error $e");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("ลบไม่สำเร็จ")));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    void openEditAppointment(BuildContext context) {
-      isEdit = true;
+    void openCreateDialog() {
+      clearController();
       showDialog(
-        barrierDismissible: false,
         context: context,
-        builder: (context) {
-          return Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Form(
-              key: _formKey,
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(child: Text('แก้ไขข้อมูลนัดหมาย')),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: "แก้ไขหัวข้อนัดหมาย",
-                        hintText: "เช่น ตรวจเลือด",
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'กรุณากรอกชื่อนัดหมาย';
-                        }
-                        if (value.length < 3) {
-                          return 'ต้องมีอย่างน้อย 3 ตัวอักษร';
-                        }
-                        return null;
-                      },
+        builder: (_) => AppointmentFormDialog(
+          formKey: _formKey,
+          title: "เพิ่มนัดหมาย",
+          titleController: _titleController,
+          detailController: _detailController,
+          locationController: _locationController,
+          dateController: _dateTimeController,
+          onPickDate: _selectDateTime,
+          onCancel: () async {
+            if (_titleController.text.isNotEmpty ||
+                _locationController.text.isNotEmpty ||
+                _detailController.text.isNotEmpty ||
+                _dateTimeController.text.isNotEmpty) {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text("ข้อมูลยังไม่ถูกบันทึก"),
+                    content: Text(
+                      "คุณต้องการปิดหรือไม่ ถ้าปิดข้อมูลจะไม่ถูกบันทึก",
                     ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _detailController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: "รายละเอียดนัดหมาย",
-                        hintText: "เช่น งดข้าวก่อนไปตรวจ 8 ชม.",
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _locationController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: "แก้ไขสถานที่นัดหมาย",
-                        hintText: "เช่น โรงพยาบาลกรุงเทพ",
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'กรุณากรอกสถานที่นัดหมาย';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _dateTimeController,
-                      onTap: () {
-                        _selectDateTime(context);
-                      },
-
-                      decoration: const InputDecoration(
-                        labelText: 'แก้ไขเวลานัดหมาย',
-                        hintText: "เช่น 1 มีนาคม 2026 14:30",
-                        suffixIcon: Icon(Icons.calendar_today),
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        // Add validation
-                        if (value == null || value.isEmpty) {
-                          return 'กรุณากรอกเวลานัดหมาย';
-                        }
-                        try {
-                          final selectDate = DateFormat(
-                            "d MMMM yyyy HH:mm",
-                            "th",
-                          ).parse(value);
-
-                          if (selectDate.isBefore(
-                            DateTime.now().subtract(Duration(days: 1)),
-                          )) {
-                            return 'ไม่สามารถเลือกวันที่ย้อนหลังได้';
-                          }
-                        } catch (err) {
-                          log("Error : $err");
-                          return 'รูปแบบวันที่ไม่ถูกต้อง';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              final title = _titleController.text;
-                              final detail = _detailController.text;
-                              final location = _locationController.text;
-                              final dateTime = _dateTimeController.text;
-                              final date = _formatter.parse(dateTime);
-                              try {
-                                await AppointmentService.update(
-                                  _editingAppointmentId!,
-                                  title,
-                                  location,
-                                  date,
-                                  detail,
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("แก้ไขข้อมูลสำเร็จ")),
-                                );
-                                setState(() {
-                                  _appointments = AppointmentService.get();
-                                });
-                                Navigator.pop(context);
-                              } catch (err) {
-                                log('Exception ===> : ${err}');
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("แก้ไขข้อมูลไม่สำเร็จ"),
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          child: Text("บันทึก"),
-                        ),
-                        SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            isEdit = false;
-
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context, true);
+                          if (Navigator.canPop(context)) {
                             Navigator.pop(context);
-                          },
-                          child: Text("ยกเลิก"),
+                          }
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            "ตกลง",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text("ยกเลิก"),
+                      ),
+                    ],
+                  );
+                },
+              );
+              if (confirm == true) return;
+            } else {
+              Navigator.pop(context);
+            }
+          },
+          onSubmit: () async {
+            if (!_formKey.currentState!.validate()) return;
+            final date = _formatter.parse(_dateTimeController.text);
+            await AppointmentService.add(
+              _titleController.text,
+              _locationController.text,
+              date,
+              _detailController.text,
+            );
+            reload();
+            Navigator.pop(context);
+          },
+        ),
       );
     }
 
-    void openAppointmentInput(BuildContext context) {
+    void openEditDialog(AppointmentModel ap) {
+      _titleController.text = ap.title;
+      _locationController.text = ap.location;
+      _detailController.text = ap.detail;
+      _dateTimeController.text = _formatter.format(ap.dateTime);
+
       showDialog(
         context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Form(
-              key: _formKey,
-              child: Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Center(child: Text("กรอกข้อมูลนัดหมาย")),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _titleController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: "หัวข้อนัดหมาย",
-                        hintText: "เช่น ตรวจเลือด",
-                      ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'กรุณากรอกชื่อนัดหมาย';
-                        }
-                        if (value.length < 3) {
-                          return 'ต้องมีอย่างน้อย 3 ตัวอักษร';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _detailController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: "รายละเอียดนัดหมาย",
-                        hintText: "เช่น งดข้าวก่อนไปตรวจ 8 ชม.",
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _locationController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: "สถานที่",
-                        hintText: 'เช่น โรงพยาบาลกรุงเทพ',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'กรุณากรอกสถานที่';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _dateTimeController,
-                      onTap: () {
-                        _selectDateTime(context);
-                      },
+        builder: (_) => AppointmentFormDialog(
+          formKey: _formKey,
+          title: "แก้ไขนัดหมาย",
 
-                      decoration: const InputDecoration(
-                        labelText: 'เวลานัดหมาย',
-                        hintText: 'MM/dd/yyyy',
-                        suffixIcon: Icon(Icons.calendar_today),
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) {
-                        // Add validation
-                        if (value == null || value.isEmpty) {
-                          return 'กรุณากรอกเวลานัดหมาย';
-                        }
-                        try {
-                          final selectDate = DateFormat(
-                            "d MMMM yyyy HH:mm",
-                            "th",
-                          ).parse(value);
+          titleController: _titleController,
+          detailController: _detailController,
+          locationController: _locationController,
+          dateController: _dateTimeController,
+          onPickDate: _selectDateTime,
+          onCancel: () => Navigator.pop(context),
+          onSubmit: () async {
+            if (!_formKey.currentState!.validate()) return;
 
-                          if (selectDate.isBefore(
-                            DateTime.now().subtract(Duration(days: 1)),
-                          )) {
-                            return 'ไม่สามารถเลือกวันที่ย้อนหลังได้';
-                          }
-                        } catch (err) {
-                          log("Error : $err");
-                          return 'รูปแบบวันที่ไม่ถูกต้อง';
-                        }
-                        return null;
-                      },
-                    ),
+            final date = _formatter.parse(_dateTimeController.text);
 
-                    SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () async {
-                            if (_formKey.currentState!.validate()) {
-                              final title = _titleController.text;
-                              final detail = _detailController.text;
-                              final location = _locationController.text;
-                              final dateTime = _dateTimeController.text;
+            await AppointmentService.update(
+              ap.id,
+              _titleController.text,
+              _locationController.text,
+              date,
+              _detailController.text,
+            );
 
-                              try {
-                                final date = _formatter.parse(dateTime);
-                                await AppointmentService.add(
-                                  title,
-                                  location,
-                                  date,
-                                  detail,
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("บันทึกสำเร็จ")),
-                                );
-                                setState(() {
-                                  _appointments = AppointmentService.get();
-                                });
-                                Navigator.pop(context);
-                              } catch (err) {
-                                log('Exception ===> : ${err}');
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text("บันทึกไม่สำเร็จ")),
-                                );
-                              }
-                            }
-                          },
-                          child: Text("บันทึก"),
-                        ),
-                        SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            if (_titleController.text.isNotEmpty ||
-                                _locationController.text.isNotEmpty ||
-                                _detailController.text.isNotEmpty ||
-                                _dateTimeController.text.isNotEmpty) {
-                              final confirm = showDialog<bool>(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: Text("ข้อมูลยังไม่ถูกบันทึก"),
-                                    content: Text(
-                                      "คุณต้องการปิดหรือไม่ ถ้าปิดข้อมูลจะไม่ถูกบันทึก",
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context, true);
-                                          if (Navigator.canPop(context)) {
-                                            Navigator.pop(context);
-                                          }
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 8,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.red.withOpacity(0.8),
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "ตกลง",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: Text("ยกเลิก"),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
+            reload();
 
-                              // ถ้ากด ยกเลิก หรือปิด dialog
-                              if (confirm != true) return;
-                            } else {
-                              Navigator.pop(context);
-                            }
-                          },
-                          child: Text("ยกเลิก"),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
+            Navigator.pop(context);
+          },
+        ),
       );
     }
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -527,7 +271,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
         actions: [
           ElevatedButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStatePropertyAll(kPrimaryGreen),
+              backgroundColor: WidgetStatePropertyAll(Color(0xFF2ECC71)),
               iconColor: WidgetStatePropertyAll(Colors.white),
             ),
             onPressed: () {
@@ -538,7 +282,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 return;
               }
               clearController();
-              openAppointmentInput(context);
+              openCreateDialog();
             },
             child: Icon(Icons.add),
           ),
@@ -563,7 +307,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
             eventLoader: (day) {
               final normalized = DateTime(day.year, day.month, day.day);
               final events = _events[normalized];
-  
+
               if (events != null && events.isNotEmpty) {
                 return [events.first];
               }
@@ -612,7 +356,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
 
           Expanded(
             child: FutureBuilder<List<AppointmentModel>>(
-              future: _appointments,
+              future: appointments,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -630,7 +374,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             icon: Icon(Icons.refresh),
                             onPressed: () {
                               setState(() {
-                                _appointments = AppointmentService.get();
+                                appointments = AppointmentService.get();
                               });
                             },
                           ),
@@ -676,7 +420,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     ),
                   );
                 }
-                
+
                 return ListView.builder(
                   itemCount: filteredAppointments.length,
                   itemBuilder: (context, index) {
@@ -691,20 +435,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                             dateTime: appointment.dateTime,
                             icon: Icons.local_hospital_outlined,
                             requireTask: appointment.detail,
-                            onDelete: () {
-                              log("appoinmentId : ${appointment.id}");
-                              _deleteAppointment(appointment.id);
-                            },
-                            onEdit: () {
-                              _titleController.text = appointment.title;
-                              _detailController.text = appointment.detail;
-                              _locationController.text = appointment.location;
-                              _dateTimeController.text = _formatter.format(
-                                appointment.dateTime,
-                              );
-                              _editingAppointmentId = appointment.id;
-                              openEditAppointment(context);
-                            },
+                            onEdit: () => openEditDialog(appointment),
+                            onDelete: () => deleteAppointment(appointment.id),
                           ),
                         ],
                       ),

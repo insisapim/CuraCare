@@ -20,15 +20,15 @@ class FirstaidDataPage extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        leading: const BackButton(),
+        leading: BackButton(),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               data.title,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            const Text("คู่มือปฐมพยาบาล", style: TextStyle(fontSize: 14)),
+            Text("คู่มือปฐมพยาบาล", style: TextStyle(fontSize: 14)),
           ],
         ),
       ),
