@@ -1,4 +1,4 @@
-import 'dart:developer';
+
 
 import 'package:algoliasearch/algoliasearch.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -66,11 +66,12 @@ class ConditionService {
     if (user == null) {
       throw Exception("Unauthorized");
     }
-    log(user.conditions.toString());
+    if (user.conditions.isEmpty) {
+      return [];
+    }
     final data = await db
         .where(FieldPath.documentId, whereIn: user.conditions)
         .get();
-    log(data.docs.toString());
     return (data.docs.map((condition) {
       final map = condition.data();
       map["id"] = condition.id;

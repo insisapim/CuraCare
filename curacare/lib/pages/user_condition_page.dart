@@ -12,13 +12,13 @@ class UserConditionPage extends StatefulWidget {
 }
 
 class _UserConditionPageState extends State<UserConditionPage> {
-  late Future<List<ConditionModel>> conditions;
+  late Future<List<ConditionModel>> _conditions;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    conditions = ConditionService.getFromUser();
+    _conditions = ConditionService.getFromUser();
   }
 
   @override
@@ -66,19 +66,23 @@ class _UserConditionPageState extends State<UserConditionPage> {
           ),
           Expanded(
             child: FutureBuilder(
-              future: conditions,
+              future: _conditions,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return Center(child: Text(snapshot.error.toString()));
                 }
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: Text("กำลังโหลดข้อมูล"));
+                  return Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData) {
                   return Center(child: Text("บันทึกโรคแรกของคุณกัน!"));
                 }
 
                 final data = snapshot.data!;
+
+                if (data.isEmpty) {
+                  return Center(child: Text("บันทึกโรคแรกของคุณกัน!"));
+                }
 
                 return ListView.builder(
                   itemCount: data.length,

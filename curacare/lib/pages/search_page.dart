@@ -1,5 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:curacare/models/condition_model.dart';
+
 import 'package:curacare/models/search_condition_model.dart';
 import 'package:curacare/pages/condition_detail_page.dart';
 import 'package:curacare/services/condition_service.dart';

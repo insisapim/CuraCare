@@ -43,9 +43,9 @@ class _CustomBottomNavigationBarState extends State<CustomBottomNavigationBar> {
         if (value > pages.length) {
           return;
         }
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(builder: (context) => pages[value]),
-        );
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute<void>(builder: (context) => pages[value]));
       },
     );
   }

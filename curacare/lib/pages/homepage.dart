@@ -292,7 +292,13 @@ class _HomePageState extends State<HomePage> {
                     ),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(20),
-                      onTap: () {},
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => RoutinePage(),
+                          ),
+                        );
+                      },
                       child: Padding(
                         padding: EdgeInsets.all(20),
                         child: Row(
@@ -312,10 +318,10 @@ class _HomePageState extends State<HomePage> {
                             ),
                             SizedBox(width: 20),
                             FutureBuilder(
-                              future: RoutineService.get(),
+                              future: RoutineService.getNext(),
                               builder: (context, snapshot) {
                                 if (snapshot.hasError) {
-                                  return Text(snapshot.error.toString());
+                                  return Text("error");
                                 }
 
                                 if (snapshot.connectionState ==
@@ -324,19 +330,13 @@ class _HomePageState extends State<HomePage> {
                                 }
 
                                 if (!snapshot.hasData) {
-                                  return CircularProgressIndicator();
-                                }
-
-                                final data = snapshot.data!;
-
-                                if (data.isEmpty) {
                                   return Expanded(
                                     child: Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          "กำหนดกิจวัตรแรกกันเถอะ!",
+                                          "ไม่มีกิจวัตรต่อไป",
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
@@ -351,8 +351,7 @@ class _HomePageState extends State<HomePage> {
                                   );
                                 }
 
-                                final routine = data.first;
-
+                                final routine = snapshot.data!;
                                 return Expanded(
                                   child: Column(
                                     crossAxisAlignment:
@@ -371,7 +370,15 @@ class _HomePageState extends State<HomePage> {
                                       SizedBox(height: 6),
 
                                       Text(
-                                        "เวลา : ${routine.time.hour}:${routine.time.minute}",
+                                        DateFormat("HH:mm", "th").format(
+                                          DateTime(
+                                            2000,
+                                            0,
+                                            0,
+                                            routine.time.hour,
+                                            routine.time.minute,
+                                          ),
+                                        ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(

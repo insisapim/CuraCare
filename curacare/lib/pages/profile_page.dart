@@ -1,10 +1,8 @@
-import 'dart:developer';
+
 
 import 'package:curacare/models/user_model.dart';
-import 'package:curacare/pages/homepage.dart';
 import 'package:curacare/pages/login_page.dart';
 import 'package:curacare/pages/user_condition_page.dart';
-import 'package:curacare/services/authentication_service.dart';
 import 'package:curacare/services/user_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:curacare/widgets/format_card.dart';

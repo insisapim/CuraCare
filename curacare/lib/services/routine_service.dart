@@ -1,4 +1,4 @@
-import 'dart:developer';
+
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curacare/models/routine_model.dart';
@@ -115,9 +115,36 @@ class RoutineService {
         completes += 1;
       }
     }
- 
+
     final double progress = completes / routines.length;
 
     return (progress * 100).floor();
+  }
+
+  static Future<RoutineModel?> getNext() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return null;
+    }
+
+    final timeNow = TimeOfDay.now();
+
+    final data = await db
+        .where("uid", isEqualTo: user.uid)
+        .orderBy("time.hour")
+        .orderBy("time.minute")
+        .get();
+
+    final routines = (data.docs.map((routine) {
+      final map = routine.data();
+      map["id"] = routine.id;
+      return RoutineModel.fromJson(map);
+    })).toList();
+
+    final nextRoutines = routines.where(
+      (routine) => routine.time.isAfter(timeNow),
+    );
+
+    return nextRoutines.first;
   }
 }

@@ -1,4 +1,4 @@
-import 'package:algoliasearch/algoliasearch.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curacare/models/appointment_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
