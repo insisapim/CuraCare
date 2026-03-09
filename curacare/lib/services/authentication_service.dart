@@ -1,7 +1,9 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curacare/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class AuthenticationService {
   static Future<AuthenticationResponse> signIn(
@@ -9,10 +11,17 @@ class AuthenticationService {
     String password,
   ) async {
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      String? token = await FirebaseMessaging.instance.getToken();
+
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(credential.user!.uid)
+          .set({"fcmToken": token}, SetOptions(merge: true));
 
       return AuthenticationResponse(ok: true, message: "Done");
     } on FirebaseAuthException catch (e) {

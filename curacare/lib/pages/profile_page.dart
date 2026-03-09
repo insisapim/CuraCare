@@ -1,8 +1,7 @@
-
-
 import 'package:curacare/models/user_model.dart';
 import 'package:curacare/pages/login_page.dart';
 import 'package:curacare/pages/user_condition_page.dart';
+import 'package:curacare/pages/user_medicine_page.dart';
 import 'package:curacare/services/user_service.dart';
 import 'package:curacare/widgets/custom_bottom_navigation_bar.dart';
 import 'package:curacare/widgets/format_card.dart';
@@ -123,6 +122,18 @@ class _ProfilePageState extends State<ProfilePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => UserConditionPage()),
+                );
+              },
+            ),
+            SizedBox(height: 20),
+            FormatCard(
+              card_title: "บันทึกยา",
+              card_sup_title: "จัดการบันทึกเปลี่ยนแปลงการบันทึกยา",
+              icon: Icons.medical_information,
+              toScreen: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => UserMedicinePage()),
                 );
               },
             ),

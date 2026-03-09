@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:curacare/models/user_model.dart';
 import 'package:curacare/pages/appointment_page.dart';
 import 'package:curacare/pages/firstaid_page.dart';
@@ -321,6 +323,7 @@ class _HomePageState extends State<HomePage> {
                               future: RoutineService.getNext(),
                               builder: (context, snapshot) {
                                 if (snapshot.hasError) {
+                                  log(snapshot.error.toString());
                                   return Text("error");
                                 }
 

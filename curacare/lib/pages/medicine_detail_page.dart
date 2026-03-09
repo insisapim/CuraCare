@@ -1,30 +1,37 @@
-import 'package:curacare/models/condition_model.dart';
+import 'package:curacare/models/medicine_model.dart';
 import 'package:curacare/models/user_model.dart';
-import 'package:curacare/services/condition_service.dart';
+import 'package:curacare/services/medicine_service.dart';
 import 'package:curacare/services/user_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ConditionDetailPage extends StatefulWidget {
-  const ConditionDetailPage({super.key, required this.conditionId});
+class MedicineDetailPage extends StatefulWidget {
+  const MedicineDetailPage({super.key, required this.medicineId});
 
-  final String conditionId;
+  final String medicineId;
 
   @override
-  State<ConditionDetailPage> createState() => _ConditionDetailPageState();
+  State<MedicineDetailPage> createState() => _MedicineDetailPageState();
 }
 
-class _ConditionDetailPageState extends State<ConditionDetailPage> {
-  late Future<ConditionModel?> _conditionFuture;
+class _MedicineDetailPageState extends State<MedicineDetailPage> {
+  late Future<MedicineModel?> _medicine;
   late Future<UserModel?> _userModelFuture;
 
   User? get user => FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
-    _conditionFuture = ConditionService.getById(widget.conditionId);
+    _medicine = MedicineService.getById(widget.medicineId);
     _userModelFuture = UserService.getByUid();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) => AppBar(
@@ -48,12 +55,10 @@ class _ConditionDetailPageState extends State<ConditionDetailPage> {
 
                 final userProfile = snapshot.data!;
 
-                if (userProfile.conditions.contains(widget.conditionId)) {
+                if (userProfile.medicines.contains(widget.medicineId)) {
                   return TextButton(
                     onPressed: () async {
-                      await UserService.removeCondition(
-                        widget.conditionId,
-                      );
+                      await UserService.removeMedicine(widget.medicineId);
                       setState(() {
                         _userModelFuture = UserService.getByUid();
                       });
@@ -64,9 +69,7 @@ class _ConditionDetailPageState extends State<ConditionDetailPage> {
 
                 return TextButton(
                   onPressed: () async {
-                    await UserService.addCondition(
-                      widget.conditionId,
-                    );
+                    await UserService.addMedicine(widget.medicineId);
                   },
                   child: Text("บันทึก"),
                 );
@@ -76,10 +79,10 @@ class _ConditionDetailPageState extends State<ConditionDetailPage> {
   );
 
   Widget _buildBody() => FutureBuilder(
-    future: _conditionFuture,
+    future: _medicine,
     builder: (context, snapshot) {
       if (snapshot.hasError) {
-        return Center(child: Text("ขออภัย เกิดข้อผิดพลาดในการดึงข้อมูลโรค"));
+        return Center(child: Text("ขออภัย เกิดข้อผิดพลาดในการดึงข้อมูลยา"));
       }
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Center(child: CircularProgressIndicator());
@@ -89,7 +92,7 @@ class _ConditionDetailPageState extends State<ConditionDetailPage> {
         return Center(child: Text("ขออภัย ไม่พบข้อมูลโรคนี้"));
       }
 
-      final condition = snapshot.data!;
+      final medicine = snapshot.data!;
 
       return Padding(
         padding: EdgeInsetsGeometry.all(10),
@@ -98,23 +101,13 @@ class _ConditionDetailPageState extends State<ConditionDetailPage> {
             spacing: 20,
             children: [
               Text(
-                condition.name,
+                medicine.name,
                 style: const TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Text(condition.description, style: const TextStyle(fontSize: 20)),
-              Text(condition.detail, style: const TextStyle(fontSize: 17)),
-              Image.network(
-                condition.imageUrl,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) {
-                    return child;
-                  }
-                  return CircularProgressIndicator();
-                },
-              ),
+              Text(medicine.description, style: const TextStyle(fontSize: 17)),
             ],
           ),
         ),
