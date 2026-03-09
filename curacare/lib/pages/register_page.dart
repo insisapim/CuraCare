@@ -193,7 +193,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     onPressed: () async {
                       if (!mounted) return;
                       if (_passwordController.text !=
-                          _confirmPasswordController) {
+                          _confirmPasswordController.text) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
