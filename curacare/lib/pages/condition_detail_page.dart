@@ -28,6 +28,7 @@ class _ConditionDetailPageState extends State<ConditionDetailPage> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) => AppBar(
+    backgroundColor: Colors.white,
     actions: (user == null)
         ? null
         : [
@@ -51,24 +52,54 @@ class _ConditionDetailPageState extends State<ConditionDetailPage> {
                 if (userProfile.conditions.contains(widget.conditionId)) {
                   return TextButton(
                     onPressed: () async {
-                      await UserService.removeCondition(
-                        widget.conditionId,
-                      );
+                      await UserService.removeCondition(widget.conditionId);
                       setState(() {
                         _userModelFuture = UserService.getByUid();
                       });
                     },
-                    child: Text("ลบบันทึก"),
+                    child: Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Color.fromARGB(255, 255, 0, 0),
+
+                        borderRadius: BorderRadius.circular(
+                          15.0,
+                        ), // Apply border radius
+                      ),
+                      child: Text(
+                        "ลบบันทึก",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   );
                 }
-
                 return TextButton(
                   onPressed: () async {
-                    await UserService.addCondition(
-                      widget.conditionId,
-                    );
+                    await UserService.addCondition(widget.conditionId);
+                    setState(() {
+                      _userModelFuture = UserService.getByUid();
+                    });
                   },
-                  child: Text("บันทึก"),
+                  child: Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF2ECC71),
+
+                        borderRadius: BorderRadius.circular(
+                          15.0,
+                        ), // Apply border radius
+                      ),
+                      child: Text(
+                        "บันทึก",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                 );
               },
             ),
@@ -124,6 +155,10 @@ class _ConditionDetailPageState extends State<ConditionDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: _buildAppBar(context), body: _buildBody());
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: _buildAppBar(context),
+      body: _buildBody(),
+    );
   }
 }

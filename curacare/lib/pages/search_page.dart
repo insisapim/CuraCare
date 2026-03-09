@@ -1,4 +1,3 @@
-
 import 'package:curacare/models/search_condition_model.dart';
 import 'package:curacare/pages/condition_detail_page.dart';
 import 'package:curacare/services/condition_service.dart';
@@ -41,6 +40,7 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   final PreferredSizeWidget _buildAppBar = AppBar(
+    backgroundColor: Colors.white,
     title: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -60,9 +60,19 @@ class _SearchPageState extends State<SearchPage> {
 
   Widget _buildListTileCard(ListTile listTile) {
     return Card(
-      color: Colors.white,
-      child: listTile,
-      shadowColor: Colors.black,
+      color: const Color.fromARGB(255, 255, 255, 255),
+      margin: EdgeInsets.only(left: 10, top: 12, right: 10),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+        child: Row(
+          children: [
+            Icon(Icons.my_library_books_rounded, color: const Color.fromARGB(255, 255, 109, 90)),
+            SizedBox(width: 10),
+            // แก้ตรงนี้: ใช้ Expanded หุ้ม item ไว้
+            Expanded(child: listTile),
+          ],
+        ),
+      ),
     );
   }
 
@@ -114,6 +124,7 @@ class _SearchPageState extends State<SearchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: _buildAppBar,
       body: Column(
         spacing: 20,

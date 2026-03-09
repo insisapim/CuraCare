@@ -35,6 +35,7 @@ class _MedicineDetailPageState extends State<MedicineDetailPage> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) => AppBar(
+    backgroundColor: Colors.white,
     actions: (user == null)
         ? null
         : [
@@ -117,6 +118,6 @@ class _MedicineDetailPageState extends State<MedicineDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: _buildAppBar(context), body: _buildBody());
+    return Scaffold(backgroundColor: Colors.white,appBar: _buildAppBar(context), body: _buildBody());
   }
 }

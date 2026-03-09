@@ -17,6 +17,7 @@ class _UserConditionPageState extends State<UserConditionPage> {
   @override
   void initState() {
     // TODO: implement initState
+
     super.initState();
     _conditions = ConditionService.getFromUser();
   }
@@ -27,10 +28,29 @@ class _UserConditionPageState extends State<UserConditionPage> {
     super.dispose();
   }
 
+  Widget _buildListTileCard(ListTile listTile) {
+    return Card(
+      color: const Color.fromARGB(255, 255, 255, 255),
+      margin: EdgeInsets.only(left: 10, top: 12, right: 10),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+        child: Row(
+          children: [
+            Icon(Icons.medical_services_outlined, color: Colors.blue),
+            SizedBox(width: 10),
+            // แก้ตรงนี้: ใช้ Expanded หุ้ม item ไว้
+            Expanded(child: listTile),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      backgroundColor: Colors.white,
+      appBar: AppBar(backgroundColor: Colors.white),
       body: Column(
         children: [
           Padding(
@@ -42,7 +62,9 @@ class _UserConditionPageState extends State<UserConditionPage> {
                 onPressed: () {
                   Navigator.of(
                     context,
-                  ).push(MaterialPageRoute(builder: (context) => SearchPage()));
+                  ).push(MaterialPageRoute(builder: (context) => SearchPage())).then((_)=>setState(() {
+                    _conditions = ConditionService.getFromUser();
+                  }));
                 },
 
                 style: ButtonStyle(
@@ -88,7 +110,8 @@ class _UserConditionPageState extends State<UserConditionPage> {
                   itemCount: data.length,
                   itemBuilder: (context, index) {
                     final condition = data[index];
-                    return ListTile(
+
+                    ListTile listTile = ListTile(
                       title: Text(
                         condition.name,
                         style: TextStyle(
@@ -103,14 +126,13 @@ class _UserConditionPageState extends State<UserConditionPage> {
                             builder: (context) =>
                                 ConditionDetailPage(conditionId: condition.id),
                           ),
-                        );
-                      },
+                        ).then((_)=>setState(() {
+                              _conditions = ConditionService.getFromUser();
 
-                      trailing: IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.add),
-                      ),
+                        }));
+                      },
                     );
+                    return _buildListTileCard(listTile);
                   },
                 );
               },

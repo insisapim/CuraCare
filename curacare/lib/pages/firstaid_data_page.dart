@@ -17,7 +17,9 @@ class FirstaidDataPage extends StatelessWidget {
     );
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: const BackButton(),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

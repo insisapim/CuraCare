@@ -557,16 +557,22 @@ class _AppointmentPageState extends State<AppointmentPage> {
                 _showAll = false;
               });
             },
+            selectedDayPredicate: (day) {
+              return isSameDay(_calendarSelectedDate, day);
+            },
             eventLoader: (day) {
               final normalized = DateTime(day.year, day.month, day.day);
               final events = _events[normalized];
-
+  
               if (events != null && events.isNotEmpty) {
                 return [events.first];
               }
 
               return [];
             },
+            headerStyle: HeaderStyle(
+              formatButtonVisible: false, // ซ่อนปุ่ม 2 weeks
+            ),
             calendarStyle: CalendarStyle(
               markerDecoration: BoxDecoration(
                 color: Colors.red,
@@ -608,10 +614,6 @@ class _AppointmentPageState extends State<AppointmentPage> {
             child: FutureBuilder<List<AppointmentModel>>(
               future: _appointments,
               builder: (context, snapshot) {
-                // log("snapshot.connectionState = ${snapshot.connectionState}");
-                // log("snapshot.hasData = ${snapshot.hasData}");
-                // log("snapshot.hasError = ${snapshot.hasError}");
-                // log("snapshot.error = ${snapshot.error}");
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 }
@@ -674,6 +676,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                     ),
                   );
                 }
+                
                 return ListView.builder(
                   itemCount: filteredAppointments.length,
                   itemBuilder: (context, index) {

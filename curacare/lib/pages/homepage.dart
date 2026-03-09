@@ -136,12 +136,49 @@ class _HomePageState extends State<HomePage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text("สถานะวันนี้", style: TextStyle(fontSize: 18)),
-                          Text(
-                            "สุขภาพดี!",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 24,
-                            ),
+                          FutureBuilder(
+                            future: RoutineService.getPercent(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                log("Error : ${snapshot.error.toString()}");
+                                return Text("เกิดข้อผิดพลาดระหว่างโหลด");
+                              }
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              }
+                              if (!snapshot.hasData) {
+                                return Text("เกิดข้อผิดพลาดระหว่างโหลด");
+                              }
+                              final percent = snapshot.data!;
+                              if (percent >= 50) {
+                                return Text(
+                                  "สุขภาพดี!",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                  ),
+                                );
+                              }else if(percent < 50 && percent >= 25){
+                                  return Text(
+                                  "สุขภาพปกติ",
+                                  style: TextStyle(
+                                    color: Colors.yellow,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                  ),
+                                );
+                              }else{
+                                return Text(
+                                  "อย่าลืมทำกิจวัตร!!",
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 24,
+                                  ),
+                                );
+                              }
+                            },
                           ),
                         ],
                       ),
