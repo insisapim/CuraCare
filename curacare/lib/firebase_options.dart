@@ -64,6 +64,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '767054586096',
     projectId: 'curacare-9e157',
     storageBucket: 'curacare-9e157.firebasestorage.app',
+    androidClientId: '767054586096-mfvnoaj2n4qelb0bk2t6nfi0r4kknhdb.apps.googleusercontent.com',
+    iosClientId: '767054586096-uuf32cddb99ccgp3048d8udtslpnerj8.apps.googleusercontent.com',
     iosBundleId: 'com.example.curacare',
   );
 
@@ -73,6 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '767054586096',
     projectId: 'curacare-9e157',
     storageBucket: 'curacare-9e157.firebasestorage.app',
+    androidClientId: '767054586096-mfvnoaj2n4qelb0bk2t6nfi0r4kknhdb.apps.googleusercontent.com',
+    iosClientId: '767054586096-uuf32cddb99ccgp3048d8udtslpnerj8.apps.googleusercontent.com',
     iosBundleId: 'com.example.curacare',
   );
 
@@ -85,5 +89,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'curacare-9e157.firebasestorage.app',
     measurementId: 'G-XW76G623XX',
   );
-}
 
+}

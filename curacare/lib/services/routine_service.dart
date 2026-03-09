@@ -1,5 +1,3 @@
-
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:curacare/models/routine_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -109,6 +107,10 @@ class RoutineService {
       return RoutineModel.fromJson(map);
     })).toList();
 
+    if (routines.isEmpty) {
+      return 0;
+    }
+
     int completes = 0;
     for (var routine in routines) {
       if (routine.isCompleted) {
@@ -140,6 +142,10 @@ class RoutineService {
       map["id"] = routine.id;
       return RoutineModel.fromJson(map);
     })).toList();
+
+    if (routines.isEmpty) {
+      return null;
+    }
 
     final nextRoutines = routines.where(
       (routine) => routine.time.isAfter(timeNow),
