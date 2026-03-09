@@ -151,6 +151,10 @@ class RoutineService {
       (routine) => routine.time.isAfter(timeNow),
     );
 
+    if (nextRoutines.isEmpty) {
+      return null;
+    }
+
     return nextRoutines.first;
   }
 }
